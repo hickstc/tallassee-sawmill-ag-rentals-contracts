@@ -1,0 +1,697 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 77;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		726FF7383010402E00AE4350 /* Customer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 726FF7373010402E00AE4350 /* Customer.swift */; };
+		727A381E300DACF2002CE19F /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 727A381D300DACF2002CE19F /* SettingsView.swift */; };
+		727C0E97300EFA2F00739E08 /* LumberPricing.swift in Sources */ = {isa = PBXBuildFile; fileRef = 727C0E96300EFA2F00739E08 /* LumberPricing.swift */; };
+		72BEC003300D526B003BBC5F /* RentalCatalog.swift in Sources */ = {isa = PBXBuildFile; fileRef = 72BEC002300D526B003BBC5F /* RentalCatalog.swift */; };
+		72D5620B3005B5CE006C8CB3 /* ContractSupport.swift in Sources */ = {isa = PBXBuildFile; fileRef = 72D5620A3005B5CD006C8CB3 /* ContractSupport.swift */; };
+		72D5620D3005B611006C8CB3 /* RentalAgreementView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 72D5620C3005B611006C8CB3 /* RentalAgreementView.swift */; };
+		72D5620F3005B66A006C8CB3 /* AgriculturalServicesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 72D5620E3005B66A006C8CB3 /* AgriculturalServicesView.swift */; };
+		72D562113006639E006C8CB3 /* PDFPreview.swift in Sources */ = {isa = PBXBuildFile; fileRef = 72D562103006639E006C8CB3 /* PDFPreview.swift */; };
+		72D5621330070993006C8CB3 /* CustomersView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 72D5621230070993006C8CB3 /* CustomersView.swift */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		721CBD912FF0944C00ED0C91 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 721CBD772FF0944A00ED0C91 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 721CBD7E2FF0944A00ED0C91;
+			remoteInfo = "Tallassee Sawmill AG & Rentals Contracts";
+		};
+		721CBD9B2FF0944C00ED0C91 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 721CBD772FF0944A00ED0C91 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 721CBD7E2FF0944A00ED0C91;
+			remoteInfo = "Tallassee Sawmill AG & Rentals Contracts";
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXFileReference section */
+		721CBD7F2FF0944A00ED0C91 /* Tallassee Sawmill AG & Rentals Contracts.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Tallassee Sawmill AG & Rentals Contracts.app"; sourceTree = BUILT_PRODUCTS_DIR; };
+		721CBD902FF0944C00ED0C91 /* Tallassee Sawmill AG & Rentals ContractsTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "Tallassee Sawmill AG & Rentals ContractsTests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
+		721CBD9A2FF0944C00ED0C91 /* Tallassee Sawmill AG & Rentals ContractsUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "Tallassee Sawmill AG & Rentals ContractsUITests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
+		726FF7373010402E00AE4350 /* Customer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Customer.swift; sourceTree = "<group>"; };
+		727A381D300DACF2002CE19F /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
+		727C0E96300EFA2F00739E08 /* LumberPricing.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LumberPricing.swift; sourceTree = "<group>"; };
+		72BEC002300D526B003BBC5F /* RentalCatalog.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RentalCatalog.swift; sourceTree = "<group>"; };
+		72D5620A3005B5CD006C8CB3 /* ContractSupport.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContractSupport.swift; sourceTree = "<group>"; };
+		72D5620C3005B611006C8CB3 /* RentalAgreementView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RentalAgreementView.swift; sourceTree = "<group>"; };
+		72D5620E3005B66A006C8CB3 /* AgriculturalServicesView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AgriculturalServicesView.swift; sourceTree = "<group>"; };
+		72D562103006639E006C8CB3 /* PDFPreview.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PDFPreview.swift; sourceTree = "<group>"; };
+		72D5621230070993006C8CB3 /* CustomersView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CustomersView.swift; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
+		721CBDA22FF0944C00ED0C91 /* Exceptions for "Tallassee Sawmill AG & Rentals Contracts" folder in "Tallassee Sawmill AG & Rentals Contracts" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Info.plist,
+			);
+			target = 721CBD7E2FF0944A00ED0C91 /* Tallassee Sawmill AG & Rentals Contracts */;
+		};
+/* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
+
+/* Begin PBXFileSystemSynchronizedRootGroup section */
+		721CBD812FF0944A00ED0C91 /* Tallassee Sawmill AG & Rentals Contracts */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				721CBDA22FF0944C00ED0C91 /* Exceptions for "Tallassee Sawmill AG & Rentals Contracts" folder in "Tallassee Sawmill AG & Rentals Contracts" target */,
+			);
+			path = "Tallassee Sawmill AG & Rentals Contracts";
+			sourceTree = "<group>";
+		};
+		721CBD932FF0944C00ED0C91 /* Tallassee Sawmill AG & Rentals ContractsTests */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = "Tallassee Sawmill AG & Rentals ContractsTests";
+			sourceTree = "<group>";
+		};
+		721CBD9D2FF0944C00ED0C91 /* Tallassee Sawmill AG & Rentals ContractsUITests */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = "Tallassee Sawmill AG & Rentals ContractsUITests";
+			sourceTree = "<group>";
+		};
+/* End PBXFileSystemSynchronizedRootGroup section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		721CBD7C2FF0944A00ED0C91 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		721CBD8D2FF0944C00ED0C91 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		721CBD972FF0944C00ED0C91 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		721CBD762FF0944A00ED0C91 = {
+			isa = PBXGroup;
+			children = (
+				721CBD812FF0944A00ED0C91 /* Tallassee Sawmill AG & Rentals Contracts */,
+				721CBD932FF0944C00ED0C91 /* Tallassee Sawmill AG & Rentals ContractsTests */,
+				721CBD9D2FF0944C00ED0C91 /* Tallassee Sawmill AG & Rentals ContractsUITests */,
+				721CBD802FF0944A00ED0C91 /* Products */,
+				72D5620A3005B5CD006C8CB3 /* ContractSupport.swift */,
+				72D5620C3005B611006C8CB3 /* RentalAgreementView.swift */,
+				72D5620E3005B66A006C8CB3 /* AgriculturalServicesView.swift */,
+				72D562103006639E006C8CB3 /* PDFPreview.swift */,
+				72D5621230070993006C8CB3 /* CustomersView.swift */,
+				72BEC002300D526B003BBC5F /* RentalCatalog.swift */,
+				727A381D300DACF2002CE19F /* SettingsView.swift */,
+				727C0E96300EFA2F00739E08 /* LumberPricing.swift */,
+				726FF7373010402E00AE4350 /* Customer.swift */,
+			);
+			sourceTree = "<group>";
+		};
+		721CBD802FF0944A00ED0C91 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				721CBD7F2FF0944A00ED0C91 /* Tallassee Sawmill AG & Rentals Contracts.app */,
+				721CBD902FF0944C00ED0C91 /* Tallassee Sawmill AG & Rentals ContractsTests.xctest */,
+				721CBD9A2FF0944C00ED0C91 /* Tallassee Sawmill AG & Rentals ContractsUITests.xctest */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		721CBD7E2FF0944A00ED0C91 /* Tallassee Sawmill AG & Rentals Contracts */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 721CBDA32FF0944C00ED0C91 /* Build configuration list for PBXNativeTarget "Tallassee Sawmill AG & Rentals Contracts" */;
+			buildPhases = (
+				721CBD7B2FF0944A00ED0C91 /* Sources */,
+				721CBD7C2FF0944A00ED0C91 /* Frameworks */,
+				721CBD7D2FF0944A00ED0C91 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			fileSystemSynchronizedGroups = (
+				721CBD812FF0944A00ED0C91 /* Tallassee Sawmill AG & Rentals Contracts */,
+			);
+			name = "Tallassee Sawmill AG & Rentals Contracts";
+			packageProductDependencies = (
+			);
+			productName = "Tallassee Sawmill AG & Rentals Contracts";
+			productReference = 721CBD7F2FF0944A00ED0C91 /* Tallassee Sawmill AG & Rentals Contracts.app */;
+			productType = "com.apple.product-type.application";
+		};
+		721CBD8F2FF0944C00ED0C91 /* Tallassee Sawmill AG & Rentals ContractsTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 721CBDA82FF0944C00ED0C91 /* Build configuration list for PBXNativeTarget "Tallassee Sawmill AG & Rentals ContractsTests" */;
+			buildPhases = (
+				721CBD8C2FF0944C00ED0C91 /* Sources */,
+				721CBD8D2FF0944C00ED0C91 /* Frameworks */,
+				721CBD8E2FF0944C00ED0C91 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				721CBD922FF0944C00ED0C91 /* PBXTargetDependency */,
+			);
+			fileSystemSynchronizedGroups = (
+				721CBD932FF0944C00ED0C91 /* Tallassee Sawmill AG & Rentals ContractsTests */,
+			);
+			name = "Tallassee Sawmill AG & Rentals ContractsTests";
+			packageProductDependencies = (
+			);
+			productName = "Tallassee Sawmill AG & Rentals ContractsTests";
+			productReference = 721CBD902FF0944C00ED0C91 /* Tallassee Sawmill AG & Rentals ContractsTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
+		721CBD992FF0944C00ED0C91 /* Tallassee Sawmill AG & Rentals ContractsUITests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 721CBDAB2FF0944C00ED0C91 /* Build configuration list for PBXNativeTarget "Tallassee Sawmill AG & Rentals ContractsUITests" */;
+			buildPhases = (
+				721CBD962FF0944C00ED0C91 /* Sources */,
+				721CBD972FF0944C00ED0C91 /* Frameworks */,
+				721CBD982FF0944C00ED0C91 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				721CBD9C2FF0944C00ED0C91 /* PBXTargetDependency */,
+			);
+			fileSystemSynchronizedGroups = (
+				721CBD9D2FF0944C00ED0C91 /* Tallassee Sawmill AG & Rentals ContractsUITests */,
+			);
+			name = "Tallassee Sawmill AG & Rentals ContractsUITests";
+			packageProductDependencies = (
+			);
+			productName = "Tallassee Sawmill AG & Rentals ContractsUITests";
+			productReference = 721CBD9A2FF0944C00ED0C91 /* Tallassee Sawmill AG & Rentals ContractsUITests.xctest */;
+			productType = "com.apple.product-type.bundle.ui-testing";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		721CBD772FF0944A00ED0C91 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = 1;
+				KnownAssetTags = (
+					New,
+				);
+				LastSwiftUpdateCheck = 2660;
+				LastUpgradeCheck = 2660;
+				TargetAttributes = {
+					721CBD7E2FF0944A00ED0C91 = {
+						CreatedOnToolsVersion = 26.6;
+					};
+					721CBD8F2FF0944C00ED0C91 = {
+						CreatedOnToolsVersion = 26.6;
+						TestTargetID = 721CBD7E2FF0944A00ED0C91;
+					};
+					721CBD992FF0944C00ED0C91 = {
+						CreatedOnToolsVersion = 26.6;
+						TestTargetID = 721CBD7E2FF0944A00ED0C91;
+					};
+				};
+			};
+			buildConfigurationList = 721CBD7A2FF0944A00ED0C91 /* Build configuration list for PBXProject "Tallassee Sawmill AG & Rentals Contracts" */;
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+				Base,
+			);
+			mainGroup = 721CBD762FF0944A00ED0C91;
+			minimizedProjectReferenceProxies = 1;
+			preferredProjectObjectVersion = 77;
+			productRefGroup = 721CBD802FF0944A00ED0C91 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				721CBD7E2FF0944A00ED0C91 /* Tallassee Sawmill AG & Rentals Contracts */,
+				721CBD8F2FF0944C00ED0C91 /* Tallassee Sawmill AG & Rentals ContractsTests */,
+				721CBD992FF0944C00ED0C91 /* Tallassee Sawmill AG & Rentals ContractsUITests */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		721CBD7D2FF0944A00ED0C91 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		721CBD8E2FF0944C00ED0C91 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		721CBD982FF0944C00ED0C91 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		721CBD7B2FF0944A00ED0C91 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				72D5621330070993006C8CB3 /* CustomersView.swift in Sources */,
+				72D5620B3005B5CE006C8CB3 /* ContractSupport.swift in Sources */,
+				72D5620D3005B611006C8CB3 /* RentalAgreementView.swift in Sources */,
+				72D5620F3005B66A006C8CB3 /* AgriculturalServicesView.swift in Sources */,
+				72BEC003300D526B003BBC5F /* RentalCatalog.swift in Sources */,
+				726FF7383010402E00AE4350 /* Customer.swift in Sources */,
+				727C0E97300EFA2F00739E08 /* LumberPricing.swift in Sources */,
+				72D562113006639E006C8CB3 /* PDFPreview.swift in Sources */,
+				727A381E300DACF2002CE19F /* SettingsView.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		721CBD8C2FF0944C00ED0C91 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		721CBD962FF0944C00ED0C91 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		721CBD922FF0944C00ED0C91 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 721CBD7E2FF0944A00ED0C91 /* Tallassee Sawmill AG & Rentals Contracts */;
+			targetProxy = 721CBD912FF0944C00ED0C91 /* PBXContainerItemProxy */;
+		};
+		721CBD9C2FF0944C00ED0C91 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 721CBD7E2FF0944A00ED0C91 /* Tallassee Sawmill AG & Rentals Contracts */;
+			targetProxy = 721CBD9B2FF0944C00ED0C91 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
+/* Begin XCBuildConfiguration section */
+		721CBDA42FF0944C00ED0C91 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = VWW7PK2HUG;
+				ENABLE_APP_SANDBOX = YES;
+				ENABLE_HARDENED_RUNTIME = YES;
+				ENABLE_INCOMING_NETWORK_CONNECTIONS = NO;
+				ENABLE_OUTGOING_NETWORK_CONNECTIONS = NO;
+				ENABLE_PREVIEWS = YES;
+				ENABLE_RESOURCE_ACCESS_AUDIO_INPUT = NO;
+				ENABLE_RESOURCE_ACCESS_BLUETOOTH = NO;
+				ENABLE_RESOURCE_ACCESS_CALENDARS = NO;
+				ENABLE_RESOURCE_ACCESS_CAMERA = NO;
+				ENABLE_RESOURCE_ACCESS_CONTACTS = NO;
+				ENABLE_RESOURCE_ACCESS_LOCATION = NO;
+				ENABLE_RESOURCE_ACCESS_PRINTING = NO;
+				ENABLE_RESOURCE_ACCESS_USB = NO;
+				ENABLE_USER_SELECTED_FILES = readonly;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = "Tallassee Sawmill AG & Rentals Contracts/Info.plist";
+				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphoneos*]" = YES;
+				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphonesimulator*]" = YES;
+				"INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents[sdk=iphoneos*]" = YES;
+				"INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents[sdk=iphonesimulator*]" = YES;
+				"INFOPLIST_KEY_UILaunchScreen_Generation[sdk=iphoneos*]" = YES;
+				"INFOPLIST_KEY_UILaunchScreen_Generation[sdk=iphonesimulator*]" = YES;
+				"INFOPLIST_KEY_UIStatusBarStyle[sdk=iphoneos*]" = UIStatusBarStyleDefault;
+				"INFOPLIST_KEY_UIStatusBarStyle[sdk=iphonesimulator*]" = UIStatusBarStyleDefault;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				LD_RUNPATH_SEARCH_PATHS = "@executable_path/Frameworks";
+				"LD_RUNPATH_SEARCH_PATHS[sdk=macosx*]" = "@executable_path/../Frameworks";
+				MACOSX_DEPLOYMENT_TARGET = 26.5;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "Tallassee-Sawmill.Tallassee-Sawmill-AG---Rentals-Contracts";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				REGISTER_APP_GROUPS = YES;
+				SDKROOT = auto;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator macosx xros xrsimulator";
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2,7";
+				XROS_DEPLOYMENT_TARGET = 26.5;
+			};
+			name = Debug;
+		};
+		721CBDA52FF0944C00ED0C91 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = VWW7PK2HUG;
+				ENABLE_APP_SANDBOX = YES;
+				ENABLE_HARDENED_RUNTIME = YES;
+				ENABLE_INCOMING_NETWORK_CONNECTIONS = NO;
+				ENABLE_OUTGOING_NETWORK_CONNECTIONS = NO;
+				ENABLE_PREVIEWS = YES;
+				ENABLE_RESOURCE_ACCESS_AUDIO_INPUT = NO;
+				ENABLE_RESOURCE_ACCESS_BLUETOOTH = NO;
+				ENABLE_RESOURCE_ACCESS_CALENDARS = NO;
+				ENABLE_RESOURCE_ACCESS_CAMERA = NO;
+				ENABLE_RESOURCE_ACCESS_CONTACTS = NO;
+				ENABLE_RESOURCE_ACCESS_LOCATION = NO;
+				ENABLE_RESOURCE_ACCESS_PRINTING = NO;
+				ENABLE_RESOURCE_ACCESS_USB = NO;
+				ENABLE_USER_SELECTED_FILES = readonly;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = "Tallassee Sawmill AG & Rentals Contracts/Info.plist";
+				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphoneos*]" = YES;
+				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphonesimulator*]" = YES;
+				"INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents[sdk=iphoneos*]" = YES;
+				"INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents[sdk=iphonesimulator*]" = YES;
+				"INFOPLIST_KEY_UILaunchScreen_Generation[sdk=iphoneos*]" = YES;
+				"INFOPLIST_KEY_UILaunchScreen_Generation[sdk=iphonesimulator*]" = YES;
+				"INFOPLIST_KEY_UIStatusBarStyle[sdk=iphoneos*]" = UIStatusBarStyleDefault;
+				"INFOPLIST_KEY_UIStatusBarStyle[sdk=iphonesimulator*]" = UIStatusBarStyleDefault;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				LD_RUNPATH_SEARCH_PATHS = "@executable_path/Frameworks";
+				"LD_RUNPATH_SEARCH_PATHS[sdk=macosx*]" = "@executable_path/../Frameworks";
+				MACOSX_DEPLOYMENT_TARGET = 26.5;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "Tallassee-Sawmill.Tallassee-Sawmill-AG---Rentals-Contracts";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				REGISTER_APP_GROUPS = YES;
+				SDKROOT = auto;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator macosx xros xrsimulator";
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2,7";
+				XROS_DEPLOYMENT_TARGET = 26.5;
+			};
+			name = Release;
+		};
+		721CBDA62FF0944C00ED0C91 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				DEVELOPMENT_TEAM = VWW7PK2HUG;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG $(inherited)";
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+			};
+			name = Debug;
+		};
+		721CBDA72FF0944C00ED0C91 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				DEVELOPMENT_TEAM = VWW7PK2HUG;
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				SWIFT_COMPILATION_MODE = wholemodule;
+			};
+			name = Release;
+		};
+		721CBDA92FF0944C00ED0C91 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = VWW7PK2HUG;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				MACOSX_DEPLOYMENT_TARGET = 26.5;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "Tallassee-Sawmill.Tallassee-Sawmill-AG---Rentals-ContractsTests";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = auto;
+				STRING_CATALOG_GENERATE_SYMBOLS = NO;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator macosx xros xrsimulator";
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2,7";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Tallassee Sawmill AG & Rentals Contracts.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/Tallassee Sawmill AG & Rentals Contracts";
+				XROS_DEPLOYMENT_TARGET = 26.5;
+			};
+			name = Debug;
+		};
+		721CBDAA2FF0944C00ED0C91 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = VWW7PK2HUG;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				MACOSX_DEPLOYMENT_TARGET = 26.5;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "Tallassee-Sawmill.Tallassee-Sawmill-AG---Rentals-ContractsTests";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = auto;
+				STRING_CATALOG_GENERATE_SYMBOLS = NO;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator macosx xros xrsimulator";
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2,7";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Tallassee Sawmill AG & Rentals Contracts.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/Tallassee Sawmill AG & Rentals Contracts";
+				XROS_DEPLOYMENT_TARGET = 26.5;
+			};
+			name = Release;
+		};
+		721CBDAC2FF0944C00ED0C91 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = VWW7PK2HUG;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				MACOSX_DEPLOYMENT_TARGET = 26.5;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "Tallassee-Sawmill.Tallassee-Sawmill-AG---Rentals-ContractsUITests";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = auto;
+				STRING_CATALOG_GENERATE_SYMBOLS = NO;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator macosx xros xrsimulator";
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2,7";
+				TEST_TARGET_NAME = "Tallassee Sawmill AG & Rentals Contracts";
+				XROS_DEPLOYMENT_TARGET = 26.5;
+			};
+			name = Debug;
+		};
+		721CBDAD2FF0944C00ED0C91 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = VWW7PK2HUG;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				MACOSX_DEPLOYMENT_TARGET = 26.5;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "Tallassee-Sawmill.Tallassee-Sawmill-AG---Rentals-ContractsUITests";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = auto;
+				STRING_CATALOG_GENERATE_SYMBOLS = NO;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator macosx xros xrsimulator";
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2,7";
+				TEST_TARGET_NAME = "Tallassee Sawmill AG & Rentals Contracts";
+				XROS_DEPLOYMENT_TARGET = 26.5;
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		721CBD7A2FF0944A00ED0C91 /* Build configuration list for PBXProject "Tallassee Sawmill AG & Rentals Contracts" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				721CBDA62FF0944C00ED0C91 /* Debug */,
+				721CBDA72FF0944C00ED0C91 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		721CBDA32FF0944C00ED0C91 /* Build configuration list for PBXNativeTarget "Tallassee Sawmill AG & Rentals Contracts" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				721CBDA42FF0944C00ED0C91 /* Debug */,
+				721CBDA52FF0944C00ED0C91 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		721CBDA82FF0944C00ED0C91 /* Build configuration list for PBXNativeTarget "Tallassee Sawmill AG & Rentals ContractsTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				721CBDA92FF0944C00ED0C91 /* Debug */,
+				721CBDAA2FF0944C00ED0C91 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		721CBDAB2FF0944C00ED0C91 /* Build configuration list for PBXNativeTarget "Tallassee Sawmill AG & Rentals ContractsUITests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				721CBDAC2FF0944C00ED0C91 /* Debug */,
+				721CBDAD2FF0944C00ED0C91 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = 721CBD772FF0944A00ED0C91 /* Project object */;
+}
