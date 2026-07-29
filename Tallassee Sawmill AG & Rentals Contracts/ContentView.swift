@@ -2,13 +2,17 @@ import SwiftUI
 
 // MARK: - Contract / Tool Selection
 
-private enum ContractType: String, CaseIterable, Identifiable, Hashable {
+/// Every module the dashboard can route to. Internal (not private) because
+/// HomeDashboardView builds its navigation links from these cases.
+enum ContractType: String, CaseIterable, Identifiable, Hashable {
     case rental
     case ag
     case calculator
     case orders
     case milling
     case maintenance
+    case customers
+    case financials
     case settings
 
     var id: String { rawValue }
@@ -21,6 +25,8 @@ private enum ContractType: String, CaseIterable, Identifiable, Hashable {
         case .orders: return "Lumber Orders"
         case .milling: return "Customer Logs Milled"
         case .maintenance: return "Maintenance"
+        case .customers: return "Customers"
+        case .financials: return "Financial Report"
         case .settings: return "Settings"
         }
     }
@@ -33,6 +39,8 @@ private enum ContractType: String, CaseIterable, Identifiable, Hashable {
         case .orders: return "list.bullet.rectangle"
         case .milling: return "tree.fill"
         case .maintenance: return "wrench.and.screwdriver.fill"
+        case .customers: return "person.2.fill"
+        case .financials: return "chart.bar.fill"
         case .settings: return "gearshape.fill"
         }
     }
@@ -43,19 +51,10 @@ private enum ContractType: String, CaseIterable, Identifiable, Hashable {
 struct ContentView: View {
     var body: some View {
         NavigationStack {
-            List {
-                ForEach(ContractType.allCases) { type in
-                    NavigationLink(value: type) {
-                        Label(type.title, systemImage: type.systemImage)
-                            .font(.headline)
-                            .padding(.vertical, 4)
-                    }
+            HomeDashboardView()
+                .navigationDestination(for: ContractType.self) { type in
+                    destination(for: type)
                 }
-            }
-            .navigationTitle("Tallassee Sawmill")
-            .navigationDestination(for: ContractType.self) { type in
-                destination(for: type)
-            }
         }
     }
 
@@ -75,6 +74,10 @@ struct ContentView: View {
             MillingJobsView()
         case .maintenance:
             MaintenanceView()
+        case .customers:
+            CustomersView()
+        case .financials:
+            FinancialReportView()
         case .settings:
             SettingsView()
         }
