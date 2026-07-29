@@ -91,6 +91,17 @@ struct MaintenanceView: View {
                     .badge(parts.count)
                 }
                 NavigationLink {
+                    InventoryView()
+                } label: {
+                    let lowCount = parts.filter(\.isLowStock).count
+                    Label {
+                        Text("Inventory")
+                    } icon: {
+                        Image(systemName: "archivebox.fill")
+                    }
+                    .badge(lowCount > 0 ? Text("\(lowCount) low") : nil)
+                }
+                NavigationLink {
                     ServiceKitsView()
                 } label: {
                     Label {
