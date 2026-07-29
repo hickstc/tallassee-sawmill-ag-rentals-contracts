@@ -165,6 +165,8 @@ struct MaintenanceTaskFormView: View {
     @State private var reminderEnabled = false
     @State private var reminderLeadDays = 7
     @State private var notes = ""
+    @State private var defaultKit: ServiceKit?
+    @Query(sort: \ServiceKit.name) private var kits: [ServiceKit]
 
     private var meterUnit: String {
         equipment?.meterType.unitAbbreviation ?? "hrs"
@@ -193,6 +195,19 @@ struct MaintenanceTaskFormView: View {
                     DatePicker("Date", selection: $lastDoneDate, displayedComponents: .date)
                     TextField("Meter reading (\(meterUnit))", value: $lastDoneMeter, format: .number)
                         .keyboardType(.decimalPad)
+                }
+            }
+
+            if !kits.isEmpty {
+                Section {
+                    Picker("Default Kit", selection: $defaultKit) {
+                        Text("None").tag(ServiceKit?.none)
+                        ForEach(kits, id: \.uuid) { kit in
+                            Text(kit.name).tag(ServiceKit?.some(kit))
+                        }
+                    }
+                } footer: {
+                    Text("The kit's parts and quantities prefill the Complete Service sheet.")
                 }
             }
 
@@ -236,6 +251,7 @@ struct MaintenanceTaskFormView: View {
         reminderEnabled = task.reminderEnabled
         reminderLeadDays = task.reminderLeadDays
         notes = task.notes
+        defaultKit = task.defaultKit
     }
 
     private func save() {
@@ -254,6 +270,7 @@ struct MaintenanceTaskFormView: View {
         saved.reminderEnabled = reminderEnabled
         saved.reminderLeadDays = reminderLeadDays
         saved.notes = notes
+        saved.defaultKit = defaultKit
 
         if reminderEnabled {
             Task {
@@ -286,6 +303,9 @@ struct CompleteServiceView: View {
     /// Quantity of each machine part consumed by this service, keyed by part UUID.
     @State private var usedQuantities: [UUID: Double] = [:]
     @State private var lowStockMessage: String?
+    /// Kit parts that aren't linked to this machine but were pulled in by a kit.
+    @State private var extraParts: [Part] = []
+    @Query(sort: \ServiceKit.name) private var kits: [ServiceKit]
 
     private var meterUnit: String {
         task.equipment?.meterType.unitAbbreviation ?? "hrs"
@@ -294,6 +314,17 @@ struct CompleteServiceView: View {
     /// Parts linked to this machine, offered for consumption.
     private var machineParts: [Part] {
         (task.equipment?.sortedPartLinks ?? []).compactMap(\.part)
+    }
+
+    /// Machine parts plus anything a kit added, without duplicates.
+    private var selectableParts: [Part] {
+        var seen = Set(machineParts.map(\.uuid))
+        var all = machineParts
+        for part in extraParts where !seen.contains(part.uuid) {
+            seen.insert(part.uuid)
+            all.append(part)
+        }
+        return all
     }
 
     var body: some View {
@@ -307,7 +338,7 @@ struct CompleteServiceView: View {
                 }
             }
 
-            if !machineParts.isEmpty {
+            if !selectableParts.isEmpty || !kits.isEmpty {
                 partsUsedSection
             }
 
@@ -333,6 +364,10 @@ struct CompleteServiceView: View {
         }
         .onAppear {
             meterAtService = task.equipment.map { $0.currentMeter }
+            // Prefill from the task's default kit, if one is set.
+            if let kit = task.defaultKit {
+                apply(kit)
+            }
         }
         // Shown after saving when the service dropped any stock to a low level.
         .alert("Low Stock", isPresented: .init(
@@ -348,20 +383,46 @@ struct CompleteServiceView: View {
         }
     }
 
-    /// One row per machine part with a quantity stepper; whatever is entered
-    /// here is decremented from inventory on save.
+    /// One row per part with a quantity stepper; whatever is entered here is
+    /// decremented from inventory on save. A kit can fill the quantities in
+    /// one tap.
     private var partsUsedSection: some View {
         Section {
-            ForEach(machineParts, id: \.uuid) { part in
+            if !kits.isEmpty {
+                Menu {
+                    ForEach(kits, id: \.uuid) { kit in
+                        Button {
+                            apply(kit)
+                        } label: {
+                            if kit.isReady {
+                                Label(kit.name, systemImage: "checkmark.circle")
+                            } else {
+                                Label("\(kit.name) (short \(kit.shortItems.count))",
+                                      systemImage: "exclamationmark.triangle")
+                            }
+                        }
+                    }
+                } label: {
+                    Label("Apply Kit", systemImage: "shippingbox.and.arrow.backward")
+                }
+            }
+
+            ForEach(selectableParts, id: \.uuid) { part in
+                let quantity = usedQuantities[part.uuid] ?? 0
                 HStack {
                     VStack(alignment: .leading, spacing: 2) {
                         Text(part.partDescription)
-                        Text("On hand: \(part.stockSummary)")
-                            .font(.caption)
-                            .foregroundStyle(part.isLowStock ? .red : .secondary)
+                        if quantity > part.quantityOnHand {
+                            Text("Only \(part.stockSummary) on hand")
+                                .font(.caption)
+                                .foregroundStyle(.red)
+                        } else {
+                            Text("On hand: \(part.stockSummary)")
+                                .font(.caption)
+                                .foregroundStyle(part.isLowStock ? .red : .secondary)
+                        }
                     }
                     Spacer()
-                    let quantity = usedQuantities[part.uuid] ?? 0
                     Stepper(
                         value: .init(
                             get: { usedQuantities[part.uuid] ?? 0 },
@@ -382,6 +443,18 @@ struct CompleteServiceView: View {
         }
     }
 
+    /// Sets each kit line's quantity, pulling in parts not linked to the machine.
+    private func apply(_ kit: ServiceKit) {
+        for item in kit.sortedItems {
+            guard let part = item.part else { continue }
+            usedQuantities[part.uuid] = item.quantity
+            if !machineParts.contains(where: { $0.uuid == part.uuid }),
+               !extraParts.contains(where: { $0.uuid == part.uuid }) {
+                extraParts.append(part)
+            }
+        }
+    }
+
     private func save() {
         let log = MaintenanceLog(
             date: date,
@@ -395,7 +468,7 @@ struct CompleteServiceView: View {
 
         // Record consumed parts and decrement inventory.
         var nowLow: [Part] = []
-        for part in machineParts {
+        for part in selectableParts {
             guard let quantity = usedQuantities[part.uuid], quantity > 0 else { continue }
             let usage = ServicePartUsage(quantity: quantity, part: part, log: log)
             modelContext.insert(usage)

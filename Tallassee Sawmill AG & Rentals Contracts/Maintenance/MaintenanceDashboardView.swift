@@ -91,6 +91,15 @@ struct MaintenanceView: View {
                     .badge(parts.count)
                 }
                 NavigationLink {
+                    ServiceKitsView()
+                } label: {
+                    Label {
+                        Text("Kits & Packages")
+                    } icon: {
+                        Image(systemName: "shippingbox.and.arrow.backward.fill")
+                    }
+                }
+                NavigationLink {
                     MaintenanceReportsView()
                 } label: {
                     Label {

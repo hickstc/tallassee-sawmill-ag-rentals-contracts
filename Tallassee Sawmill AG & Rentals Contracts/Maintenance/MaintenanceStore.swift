@@ -20,6 +20,8 @@ enum MaintenanceStore {
             Part.self,
             PartPurchase.self,
             ServicePartUsage.self,
+            ServiceKit.self,
+            ServiceKitItem.self,
             EquipmentPart.self,
             MaintenanceTask.self,
             MaintenanceLog.self,

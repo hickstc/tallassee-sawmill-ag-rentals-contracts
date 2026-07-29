@@ -283,6 +283,10 @@ final class Part {
     @Relationship(deleteRule: .nullify, inverse: \ServicePartUsage.part)
     var serviceUsages: [ServicePartUsage]? = nil
 
+    /// Kit lines referencing this part (nullified on delete; kits keep the row).
+    @Relationship(deleteRule: .nullify, inverse: \ServiceKitItem.part)
+    var kitItems: [ServiceKitItem]? = nil
+
     init(
         kind: PartKind = .part,
         oemNumber: String = "",
@@ -393,6 +397,68 @@ final class PartPurchase {
     }
 }
 
+// MARK: - Service Kit
+
+/// A named bundle of parts/fluids for one job — e.g. "SVL75 250-hr service":
+/// oil filter ×1, engine oil ×9 qt. Applying a kit when completing a service
+/// fills in the consumed quantities in one tap.
+@Model
+final class ServiceKit {
+    var uuid: UUID = UUID()
+    var name: String = ""
+    var notes: String = ""
+    var createdAt: Date = Date()
+
+    @Relationship(deleteRule: .cascade, inverse: \ServiceKitItem.kit)
+    var items: [ServiceKitItem]? = nil
+
+    /// Tasks that use this kit by default (nullified if the kit is deleted).
+    @Relationship(deleteRule: .nullify, inverse: \MaintenanceTask.defaultKit)
+    var tasks: [MaintenanceTask]? = nil
+
+    init(name: String = "", notes: String = "") {
+        self.name = name
+        self.notes = notes
+    }
+
+    var sortedItems: [ServiceKitItem] {
+        (items ?? []).sorted { $0.displayName < $1.displayName }
+    }
+
+    /// Kit lines that can't be filled from current stock.
+    var shortItems: [ServiceKitItem] {
+        sortedItems.filter { item in
+            guard let part = item.part else { return true } // part deleted
+            return part.quantityOnHand < item.quantity
+        }
+    }
+
+    /// True when every line can be filled from stock.
+    var isReady: Bool { !(items ?? []).isEmpty && shortItems.isEmpty }
+}
+
+/// One line of a service kit: a part and how much of it the job uses.
+@Model
+final class ServiceKitItem {
+    var uuid: UUID = UUID()
+    var quantity: Double = 1
+    /// Snapshot of the part name so the kit stays readable if the part is deleted.
+    var partName: String = ""
+    var part: Part? = nil
+    var kit: ServiceKit? = nil
+
+    init(quantity: Double = 1, part: Part? = nil, kit: ServiceKit? = nil) {
+        self.quantity = quantity
+        self.partName = part?.partDescription ?? ""
+        self.part = part
+        self.kit = kit
+    }
+
+    var displayName: String {
+        part?.partDescription ?? (partName.isEmpty ? "Deleted part" : partName)
+    }
+}
+
 // MARK: - Service Part Usage
 
 /// A part/fluid consumed by one service log — drives auto inventory decrement.
@@ -462,6 +528,9 @@ final class MaintenanceTask {
     var notes: String = ""
     var createdAt: Date = Date()
     var equipment: Equipment? = nil
+
+    /// Kit whose quantities prefill the Complete Service sheet for this task.
+    var defaultKit: ServiceKit? = nil
 
     @Relationship(deleteRule: .cascade, inverse: \MaintenanceLog.task)
     var logs: [MaintenanceLog]? = nil
