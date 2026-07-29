@@ -265,12 +265,14 @@ struct HomeDashboardView: View {
                                     .font(.title3)
                                     .frame(height: 24)
                                 Text(type.title)
-                                    .font(.caption2.weight(.medium))
+                                    .font(.subheadline.weight(.medium))
                                     .multilineTextAlignment(.center)
                                     .lineLimit(2, reservesSpace: true)
+                                    .minimumScaleFactor(0.85)
                             }
                             .frame(maxWidth: .infinity)
                             .padding(.vertical, 10)
+                            .padding(.horizontal, 2)
                             .background(Color(.tertiarySystemGroupedBackground),
                                         in: RoundedRectangle(cornerRadius: 10))
                         }
