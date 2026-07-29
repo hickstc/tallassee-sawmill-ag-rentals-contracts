@@ -3,9 +3,9 @@
 //  Tallassee Sawmill AG & Rentals Contracts
 //
 //  Customer-facing PDF for a completed milling job: business and customer
-//  details, every board with its dimensions and board feet, and totals.
-//  Uses the shared MaintenancePDFBuilder for the letter-size layout with
-//  logo, date, and page numbers.
+//  details, one row per board size milled (with quantity and board feet),
+//  and totals. Uses the shared MaintenancePDFBuilder for the letter-size
+//  layout with logo, date, and page numbers.
 //
 
 import Foundation
@@ -30,16 +30,17 @@ enum MillingReport {
                 pdf.infoLine("Notes", job.notes)
             }
 
-            pdf.sectionTitle("Boards")
+            pdf.sectionTitle("Lumber Milled")
             let columns = [
-                PDFColumn("Board #", weight: 0.1),
-                PDFColumn("Species", weight: 0.22),
-                PDFColumn("Width (in)", weight: 0.16),
-                PDFColumn("Thickness (in)", weight: 0.18),
+                PDFColumn("Qty", weight: 0.09),
+                PDFColumn("Species", weight: 0.2),
+                PDFColumn("Thickness (in)", weight: 0.17),
+                PDFColumn("Width (in)", weight: 0.14),
                 PDFColumn("Length (ft)", weight: 0.14),
-                PDFColumn("Board Feet", weight: 0.2),
+                PDFColumn("BF / Board", weight: 0.13),
+                PDFColumn("Total BF", weight: 0.13),
             ]
-            pdf.table(columns: columns, rows: boardRows(for: job))
+            pdf.table(columns: columns, rows: sizeRows(for: job))
 
             pdf.sectionTitle("Totals")
             pdf.infoLine("Total Boards", "\(job.totalPieces)")
@@ -49,26 +50,48 @@ enum MillingReport {
         }
     }
 
-    /// Expands each job line into individually numbered boards, so a line of
-    /// "qty 5" becomes boards 1–5 with the same dimensions.
-    private static func boardRows(for job: MillingJob) -> [[PDFCell]] {
-        var rows: [[PDFCell]] = []
-        var boardNumber = 0
-        for line in job.lines {
-            let quantity = max(Int(line.quantity.filter { $0.isNumber }) ?? 0, 0)
-            let boardFeet = line.bfPerPiece.formatted(.number.precision(.fractionLength(0...2)))
-            for _ in 0..<quantity {
-                boardNumber += 1
-                rows.append([
-                    PDFCell("\(boardNumber)"),
-                    PDFCell(line.species.displayName),
-                    PDFCell(line.widthIn),
-                    PDFCell(line.thicknessIn),
-                    PDFCell(line.lengthFt),
-                    PDFCell(boardFeet),
-                ])
-            }
+    /// One row per distinct board size: lines with the same species and
+    /// dimensions are combined, with quantities and board feet summed.
+    private static func sizeRows(for job: MillingJob) -> [[PDFCell]] {
+        struct SizeKey: Hashable {
+            let species: String
+            let thickness: String
+            let width: String
+            let length: String
         }
-        return rows
+        struct SizeTotals {
+            var quantity = 0
+            var bfPerPiece = 0.0
+            var totalBF = 0.0
+            var firstIndex = 0
+        }
+
+        var totals: [SizeKey: SizeTotals] = [:]
+        for (index, line) in job.lines.enumerated() {
+            let key = SizeKey(species: line.species.displayName,
+                              thickness: line.thicknessIn,
+                              width: line.widthIn,
+                              length: line.lengthFt)
+            var entry = totals[key] ?? SizeTotals(firstIndex: index)
+            entry.quantity += max(Int(line.quantity.filter { $0.isNumber }) ?? 0, 0)
+            entry.bfPerPiece = line.bfPerPiece
+            entry.totalBF += line.totalBF
+            totals[key] = entry
+        }
+
+        // Keep sizes in the order they were first entered.
+        return totals
+            .sorted { $0.value.firstIndex < $1.value.firstIndex }
+            .map { key, entry in
+                [
+                    PDFCell("\(entry.quantity)"),
+                    PDFCell(key.species),
+                    PDFCell(key.thickness),
+                    PDFCell(key.width),
+                    PDFCell(key.length),
+                    PDFCell(entry.bfPerPiece.formatted(.number.precision(.fractionLength(0...2)))),
+                    PDFCell(entry.totalBF.formatted(.number.precision(.fractionLength(0...2)))),
+                ]
+            }
     }
 }
