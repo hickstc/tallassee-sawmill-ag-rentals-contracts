@@ -8,6 +8,7 @@ private enum ContractType: String, CaseIterable, Identifiable, Hashable {
     case calculator
     case orders
     case milling
+    case maintenance
     case settings
 
     var id: String { rawValue }
@@ -19,6 +20,7 @@ private enum ContractType: String, CaseIterable, Identifiable, Hashable {
         case .calculator: return "Board Foot Calculator"
         case .orders: return "Lumber Orders"
         case .milling: return "Customer Logs Milled"
+        case .maintenance: return "Maintenance"
         case .settings: return "Settings"
         }
     }
@@ -30,6 +32,7 @@ private enum ContractType: String, CaseIterable, Identifiable, Hashable {
         case .calculator: return "ruler.fill"
         case .orders: return "list.bullet.rectangle"
         case .milling: return "tree.fill"
+        case .maintenance: return "wrench.and.screwdriver.fill"
         case .settings: return "gearshape.fill"
         }
     }
@@ -70,6 +73,8 @@ struct ContentView: View {
             LumberOrdersView()
         case .milling:
             MillingJobsView()
+        case .maintenance:
+            MaintenanceView()
         case .settings:
             SettingsView()
         }

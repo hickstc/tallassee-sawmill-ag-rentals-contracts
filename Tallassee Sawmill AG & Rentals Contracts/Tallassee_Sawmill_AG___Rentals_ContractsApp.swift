@@ -1,6 +1,7 @@
 //___FILEHEADER___
 
 import SwiftUI
+import SwiftData
 
 @main
 struct Tallassee_Sawmill_AG___Rentals_ContractsApp: App {
@@ -8,6 +9,9 @@ struct Tallassee_Sawmill_AG___Rentals_ContractsApp: App {
         WindowGroup {
             RootView()
         }
+        // SwiftData store for the Fleet Maintenance module (seeds Kubota
+        // equipment and parts on first launch). See MaintenanceStore.swift.
+        .modelContainer(MaintenanceStore.container)
     }
 }
 
