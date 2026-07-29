@@ -119,6 +119,15 @@ struct MaintenanceView: View {
                         Image(systemName: "doc.text.fill")
                     }
                 }
+                NavigationLink {
+                    MaintenanceDataView()
+                } label: {
+                    Label {
+                        Text("Backup & Sync")
+                    } icon: {
+                        Image(systemName: "externaldrive.fill.badge.icloud")
+                    }
+                }
             }
         }
         .navigationTitle("Maintenance")

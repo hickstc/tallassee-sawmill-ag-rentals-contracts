@@ -11,6 +11,9 @@ import SwiftData
 @MainActor
 enum MaintenanceStore {
 
+    /// UserDefaults key for the optional iCloud sync toggle (Backup & Sync).
+    static let cloudSyncKey = "maintenanceCloudSyncEnabled"
+
     /// Shared container for the whole app. Attached to the window group in
     /// Tallassee_Sawmill_AG___Rentals_ContractsApp.
     static let container: ModelContainer = {
@@ -28,15 +31,21 @@ enum MaintenanceStore {
             MaintenanceAttachment.self,
         ])
 
-        // To turn on CloudKit sync later:
-        //   1. In Signing & Capabilities, add iCloud → CloudKit and create a container.
-        //   2. Add the Background Modes → Remote notifications capability.
-        //   3. Change `cloudKitDatabase: .none` below to
-        //      `cloudKitDatabase: .private("iCloud.<your-container-id>")`.
-        // The models are already CloudKit-compatible (defaults everywhere,
-        // optional relationships, no unique constraints).
-        let configuration = ModelConfiguration(schema: schema, cloudKitDatabase: .none)
+        // Optional iCloud sync, controlled from Maintenance → Backup & Sync.
+        // Requires the iCloud → CloudKit capability (plus Background Modes →
+        // Remote notifications) in Signing & Capabilities; without it the
+        // cloud container fails to initialize and we fall back to local-only.
+        // The models are CloudKit-compatible (defaults everywhere, optional
+        // relationships, no unique constraints).
+        if UserDefaults.standard.bool(forKey: cloudSyncKey) {
+            let cloudConfiguration = ModelConfiguration(schema: schema, cloudKitDatabase: .automatic)
+            if let container = try? ModelContainer(for: schema, configurations: [cloudConfiguration]) {
+                seedIfNeeded(context: container.mainContext)
+                return container
+            }
+        }
 
+        let configuration = ModelConfiguration(schema: schema, cloudKitDatabase: .none)
         do {
             let container = try ModelContainer(for: schema, configurations: [configuration])
             seedIfNeeded(context: container.mainContext)
