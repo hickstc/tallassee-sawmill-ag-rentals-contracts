@@ -2,6 +2,8 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
+	<key>NSCalendarsFullAccessUsageDescription</key>
+	<string>Sync scheduled jobs and equipment maintenance due dates with your calendar, updating events instead of duplicating them.</string>
 	<key>NSCameraUsageDescription</key>
 	<string>Take a photo of the renter driver license to store with the rental contract.</string>
 	<key>NSPhotoLibraryUsageDescription</key>

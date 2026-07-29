@@ -526,6 +526,8 @@ final class MaintenanceTask {
     /// How many days before the due date the local notification fires.
     var reminderLeadDays: Int = 7
     var notes: String = ""
+    /// EventKit identifier of the synced calendar event ("" = not synced).
+    var calendarEventID: String = ""
     var createdAt: Date = Date()
     var equipment: Equipment? = nil
 

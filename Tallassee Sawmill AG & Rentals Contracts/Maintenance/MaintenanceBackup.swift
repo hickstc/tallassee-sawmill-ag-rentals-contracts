@@ -29,8 +29,24 @@ struct MaintenanceBackup: Codable {
     var logs: [LogDTO] = []
     var usages: [UsageDTO] = []
     var attachments: [AttachmentDTO] = []
+    /// Optional so version-1 backups made before the scheduler still decode.
+    var scheduledJobs: [JobDTO]? = nil
 
     // Entities reference each other by UUID, mirroring the SwiftData graph.
+
+    struct JobDTO: Codable {
+        var uuid: UUID
+        var jobNumber: Int
+        var customer: String
+        var type: String
+        var date: Date
+        var durationMinutes: Int
+        var address: String
+        var phone: String
+        var notes: String
+        var status: String
+        var createdAt: Date
+    }
 
     struct EquipmentDTO: Codable {
         var uuid: UUID
@@ -233,6 +249,12 @@ enum MaintenanceBackupManager {
                   createdAt: $0.createdAt, equipmentUUID: $0.equipment?.uuid,
                   logUUID: $0.log?.uuid)
         }
+        backup.scheduledJobs = try context.fetch(FetchDescriptor<ScheduledJob>()).map {
+            .init(uuid: $0.uuid, jobNumber: $0.jobNumber, customer: $0.customer,
+                  type: $0.typeRaw, date: $0.date, durationMinutes: $0.durationMinutes,
+                  address: $0.address, phone: $0.phone, notes: $0.notes,
+                  status: $0.statusRaw, createdAt: $0.createdAt)
+        }
 
         let encoder = JSONEncoder()
         encoder.dateEncodingStrategy = .iso8601
@@ -399,6 +421,18 @@ enum MaintenanceBackupManager {
             context.insert(attachment)
         }
 
+        for dto in backup.scheduledJobs ?? [] {
+            let job = ScheduledJob(jobNumber: dto.jobNumber, customer: dto.customer,
+                                   type: JobType(rawValue: dto.type) ?? .other,
+                                   date: dto.date, durationMinutes: dto.durationMinutes,
+                                   address: dto.address, phone: dto.phone, notes: dto.notes)
+            job.uuid = dto.uuid
+            job.statusRaw = dto.status
+            job.createdAt = dto.createdAt
+            // Calendar event IDs are device-specific; a fresh sync recreates events.
+            context.insert(job)
+        }
+
         try context.save()
 
         // Reschedule reminders for the restored tasks.
@@ -415,6 +449,7 @@ enum MaintenanceBackupManager {
     private static func deleteAllMaintenanceData(context: ModelContext) throws {
         // Order doesn't matter for delete(model:); cascades are irrelevant
         // because every entity is removed explicitly.
+        try context.delete(model: ScheduledJob.self)
         try context.delete(model: MaintenanceAttachment.self)
         try context.delete(model: ServicePartUsage.self)
         try context.delete(model: MaintenanceLog.self)

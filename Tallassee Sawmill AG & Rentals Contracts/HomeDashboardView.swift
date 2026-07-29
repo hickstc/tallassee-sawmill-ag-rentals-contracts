@@ -14,9 +14,11 @@ import SwiftData
 // MARK: - Dashboard
 
 struct HomeDashboardView: View {
-    // Fleet status straight from SwiftData so it live-updates.
+    // Fleet status and the unified schedule, straight from SwiftData so
+    // they live-update.
     @Query private var maintenanceTasks: [MaintenanceTask]
     @Query private var parts: [Part]
+    @Query(sort: \ScheduledJob.date) private var scheduledJobs: [ScheduledJob]
 
     // Contract-side records, loaded from their JSON stores on appear/refresh.
     @State private var rentals: [RentalAgreementRecord] = []
@@ -103,86 +105,83 @@ struct HomeDashboardView: View {
         .buttonStyle(.plain)
     }
 
-    // MARK: Today's jobs
+    // MARK: Schedule (today / overdue / upcoming)
 
-    /// A unified row for anything happening today, from any module.
-    private struct TodayJob: Identifiable {
-        let id: String
-        let title: String
-        let subtitle: String
-        let systemImage: String
-        let destination: ContractType
-    }
-
-    private var todaysJobs: [TodayJob] {
-        let calendar = Calendar.current
-        var jobs: [TodayJob] = []
-
-        for rental in rentals where calendar.isDateInToday(rental.data.startDate) {
-            jobs.append(TodayJob(
-                id: "rental-\(rental.id)",
-                title: rental.customerName.isEmpty ? "Rental" : rental.customerName,
-                subtitle: "Rental starts \(rental.data.startDate.formatted(date: .omitted, time: .shortened))",
-                systemImage: "house.fill",
-                destination: .rental
-            ))
-        }
-        for job in agJobs where calendar.isDateInToday(job.data.startDate) {
-            jobs.append(TodayJob(
-                id: "ag-\(job.id)",
-                title: job.customerName.isEmpty ? "Ag Services" : job.customerName,
-                subtitle: "Ag services job",
-                systemImage: "leaf.fill",
-                destination: .ag
-            ))
-        }
-        for job in millingJobs where calendar.isDateInToday(job.date) {
-            jobs.append(TodayJob(
-                id: "milling-\(job.id)",
-                title: job.customerName.isEmpty ? "Milling" : job.customerName,
-                subtitle: "Milling · \(job.totalBF.formatted(.number.precision(.fractionLength(0...1)))) BF",
-                systemImage: "tree.fill",
-                destination: .milling
-            ))
-        }
-        return jobs
-    }
-
+    /// The unified scheduler drives this card: jobs of every type plus
+    /// date-based equipment maintenance.
     private var todaysJobsCard: some View {
-        DashboardCard {
+        let buckets = ScheduleBuckets(jobs: scheduledJobs, tasks: maintenanceTasks)
+
+        return DashboardCard {
             VStack(alignment: .leading, spacing: 10) {
-                Text("Today's Jobs")
-                    .font(.headline)
-                if todaysJobs.isEmpty {
+                HStack {
+                    Text("Schedule")
+                        .font(.headline)
+                    Spacer()
+                    NavigationLink(value: ContractType.scheduler) {
+                        Text("Open Scheduler")
+                            .font(.subheadline)
+                    }
+                }
+
+                if !buckets.overdue.isEmpty {
+                    Label("\(buckets.overdue.count) overdue job\(buckets.overdue.count == 1 ? "" : "s")",
+                          systemImage: "exclamationmark.triangle.fill")
+                        .font(.subheadline.weight(.semibold))
+                        .foregroundStyle(.red)
+                }
+
+                if buckets.today.isEmpty {
                     Text("Nothing scheduled for today.")
                         .font(.subheadline)
                         .foregroundStyle(.secondary)
                 } else {
-                    ForEach(todaysJobs) { job in
-                        NavigationLink(value: job.destination) {
-                            HStack(spacing: 10) {
-                                Image(systemName: job.systemImage)
-                                    .foregroundStyle(.tint)
-                                    .frame(width: 24)
-                                VStack(alignment: .leading, spacing: 1) {
-                                    Text(job.title)
-                                        .font(.subheadline.weight(.medium))
-                                        .foregroundStyle(.primary)
-                                    Text(job.subtitle)
-                                        .font(.caption)
-                                        .foregroundStyle(.secondary)
-                                }
-                                Spacer()
-                                Image(systemName: "chevron.right")
-                                    .font(.caption.weight(.semibold))
-                                    .foregroundStyle(.tertiary)
-                            }
-                        }
-                        .buttonStyle(.plain)
+                    ForEach(buckets.today) { entry in
+                        scheduleRow(entry)
+                    }
+                }
+
+                if !buckets.upcoming.isEmpty {
+                    Divider()
+                    Text("Up Next")
+                        .font(.caption.weight(.semibold))
+                        .foregroundStyle(.secondary)
+                    ForEach(buckets.upcoming.prefix(3)) { entry in
+                        scheduleRow(entry)
                     }
                 }
             }
         }
+    }
+
+    @ViewBuilder
+    private func scheduleRow(_ entry: ScheduleEntry) -> some View {
+        NavigationLink(value: entry.maintenanceTask == nil
+                       ? ContractType.scheduler
+                       : ContractType.maintenance) {
+            HStack(spacing: 10) {
+                if let job = entry.job {
+                    JobRow(job: job, compact: true)
+                } else if let task = entry.maintenanceTask {
+                    Image(systemName: "wrench.and.screwdriver.fill")
+                        .foregroundStyle(.orange)
+                        .frame(width: 24)
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text("\(task.equipment?.name ?? "Equipment"): \(task.name)")
+                            .font(.subheadline.weight(.medium))
+                            .foregroundStyle(.primary)
+                        Text(task.dueSummary)
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                    }
+                    Spacer()
+                }
+                Image(systemName: "chevron.right")
+                    .font(.caption.weight(.semibold))
+                    .foregroundStyle(.tertiary)
+            }
+        }
+        .buttonStyle(.plain)
     }
 
     // MARK: Business summary (month to date)

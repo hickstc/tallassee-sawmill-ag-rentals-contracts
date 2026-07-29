@@ -280,6 +280,7 @@ struct MaintenanceTaskFormView: View {
         } else {
             ReminderScheduler.sync(task: saved)
         }
+        Task { await JobCalendarSync.syncMaintenance(saved) }
         dismiss()
     }
 }
@@ -491,6 +492,7 @@ struct CompleteServiceView: View {
             }
         }
         ReminderScheduler.sync(task: task)
+        Task { await JobCalendarSync.syncMaintenance(task) }
 
         if nowLow.isEmpty {
             dismiss()

@@ -29,6 +29,7 @@ enum MaintenanceStore {
             MaintenanceTask.self,
             MaintenanceLog.self,
             MaintenanceAttachment.self,
+            ScheduledJob.self,
         ])
 
         // Optional iCloud sync, controlled from Maintenance → Backup & Sync.
