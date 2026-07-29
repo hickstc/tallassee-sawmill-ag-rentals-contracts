@@ -46,7 +46,18 @@ enum MillingReport {
             pdf.infoLine("Total Boards", "\(job.totalPieces)")
             pdf.infoLine("Total Board Feet",
                          job.totalBF.formatted(.number.precision(.fractionLength(0...2))))
-            pdf.infoLine("Milling Total", currencyString(job.totalPrice))
+            if job.mobilizationTotal > 0 {
+                pdf.infoLine("Milling Subtotal", currencyString(job.millingSubtotal))
+                if job.sawmillMobilization {
+                    pdf.infoLine("Sawmill Mobilization Fee",
+                                 currencyString(MillingJob.mobilizationFee))
+                }
+                if job.skidSteerMobilization {
+                    pdf.infoLine("Skid Steer Mobilization Fee",
+                                 currencyString(MillingJob.mobilizationFee))
+                }
+            }
+            pdf.infoLine("Total", currencyString(job.totalPrice))
         }
     }
 

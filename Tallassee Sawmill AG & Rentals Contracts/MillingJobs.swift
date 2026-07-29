@@ -125,6 +125,9 @@ struct MillingRatesEditor: View {
 }
 
 struct MillingJob: Identifiable, Codable, Hashable {
+    /// Flat charge for hauling the sawmill or skid steer to the job site.
+    static let mobilizationFee = 300.0
+
     var id = UUID()
     /// Sequential number behind the human-readable job ID ("MILL-0007").
     /// 0 = not yet assigned (jobs saved before this field existed).
@@ -133,6 +136,8 @@ struct MillingJob: Identifiable, Codable, Hashable {
     var date: Date = Date()
     var notes: String = ""
     var completed: Bool = false
+    var sawmillMobilization: Bool = false
+    var skidSteerMobilization: Bool = false
     var lines: [MillingLine] = []
 
     init(jobNumber: Int = 0) {
@@ -141,14 +146,21 @@ struct MillingJob: Identifiable, Codable, Hashable {
 
     var totalBF: Double { lines.reduce(0) { $0 + $1.totalBF } }
     var totalPieces: Int { lines.reduce(0) { $0 + (Int($1.quantity.filter { $0.isNumber }) ?? 0) } }
-    var totalPrice: Double { lines.reduce(0) { $0 + $1.lineTotal } }
+    /// Milling labor only, before mobilization fees.
+    var millingSubtotal: Double { lines.reduce(0) { $0 + $1.lineTotal } }
+    var mobilizationTotal: Double {
+        (sawmillMobilization ? Self.mobilizationFee : 0)
+            + (skidSteerMobilization ? Self.mobilizationFee : 0)
+    }
+    var totalPrice: Double { millingSubtotal + mobilizationTotal }
 
     var jobID: String { String(format: "MILL-%04d", jobNumber) }
 
-    // Custom decoding so jobs saved before jobNumber/completed existed
+    // Custom decoding so jobs saved before the newer fields existed
     // still load (their keys are simply absent from the old JSON).
     enum CodingKeys: String, CodingKey {
-        case id, jobNumber, customerName, date, notes, completed, lines
+        case id, jobNumber, customerName, date, notes, completed
+        case sawmillMobilization, skidSteerMobilization, lines
     }
 
     init(from decoder: Decoder) throws {
@@ -159,6 +171,8 @@ struct MillingJob: Identifiable, Codable, Hashable {
         date = try container.decodeIfPresent(Date.self, forKey: .date) ?? Date()
         notes = try container.decodeIfPresent(String.self, forKey: .notes) ?? ""
         completed = try container.decodeIfPresent(Bool.self, forKey: .completed) ?? false
+        sawmillMobilization = try container.decodeIfPresent(Bool.self, forKey: .sawmillMobilization) ?? false
+        skidSteerMobilization = try container.decodeIfPresent(Bool.self, forKey: .skidSteerMobilization) ?? false
         lines = try container.decodeIfPresent([MillingLine].self, forKey: .lines) ?? []
     }
 }
@@ -314,6 +328,21 @@ private struct MillingJobDetailView: View {
             }
 
             Section {
+                Toggle(isOn: $job.sawmillMobilization) {
+                    LabeledContent("Sawmill Mobilization",
+                                   value: currencyString(MillingJob.mobilizationFee))
+                }
+                Toggle(isOn: $job.skidSteerMobilization) {
+                    LabeledContent("Skid Steer Mobilization",
+                                   value: currencyString(MillingJob.mobilizationFee))
+                }
+            } header: {
+                Text("Mobilization Fees")
+            } footer: {
+                Text("Flat charge per machine hauled to the job site, added to the job total.")
+            }
+
+            Section {
                 Toggle("Job Completed", isOn: $job.completed)
                 if job.completed {
                     Button {
@@ -385,6 +414,10 @@ private struct MillingJobDetailView: View {
                     }
                     .onDelete { job.lines.remove(atOffsets: $0) }
                     LabeledContent("Total Board Feet", value: job.totalBF.formatted(.number.precision(.fractionLength(0...2))))
+                    if job.mobilizationTotal > 0 {
+                        LabeledContent("Milling Subtotal", value: currencyString(job.millingSubtotal))
+                        LabeledContent("Mobilization Fees", value: currencyString(job.mobilizationTotal))
+                    }
                     LabeledContent("Total", value: currencyString(job.totalPrice))
                         .font(.headline)
                 }
