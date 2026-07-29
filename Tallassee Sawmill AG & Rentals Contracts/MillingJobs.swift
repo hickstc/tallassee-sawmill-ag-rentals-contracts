@@ -126,14 +126,41 @@ struct MillingRatesEditor: View {
 
 struct MillingJob: Identifiable, Codable, Hashable {
     var id = UUID()
+    /// Sequential number behind the human-readable job ID ("MILL-0007").
+    /// 0 = not yet assigned (jobs saved before this field existed).
+    var jobNumber: Int = 0
     var customerName: String = ""
     var date: Date = Date()
     var notes: String = ""
+    var completed: Bool = false
     var lines: [MillingLine] = []
+
+    init(jobNumber: Int = 0) {
+        self.jobNumber = jobNumber
+    }
 
     var totalBF: Double { lines.reduce(0) { $0 + $1.totalBF } }
     var totalPieces: Int { lines.reduce(0) { $0 + (Int($1.quantity.filter { $0.isNumber }) ?? 0) } }
     var totalPrice: Double { lines.reduce(0) { $0 + $1.lineTotal } }
+
+    var jobID: String { String(format: "MILL-%04d", jobNumber) }
+
+    // Custom decoding so jobs saved before jobNumber/completed existed
+    // still load (their keys are simply absent from the old JSON).
+    enum CodingKeys: String, CodingKey {
+        case id, jobNumber, customerName, date, notes, completed, lines
+    }
+
+    init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        id = try container.decodeIfPresent(UUID.self, forKey: .id) ?? UUID()
+        jobNumber = try container.decodeIfPresent(Int.self, forKey: .jobNumber) ?? 0
+        customerName = try container.decodeIfPresent(String.self, forKey: .customerName) ?? ""
+        date = try container.decodeIfPresent(Date.self, forKey: .date) ?? Date()
+        notes = try container.decodeIfPresent(String.self, forKey: .notes) ?? ""
+        completed = try container.decodeIfPresent(Bool.self, forKey: .completed) ?? false
+        lines = try container.decodeIfPresent([MillingLine].self, forKey: .lines) ?? []
+    }
 }
 
 // MARK: - Storage
@@ -208,9 +235,16 @@ struct MillingJobsView: View {
                         } label: {
                             HStack {
                                 VStack(alignment: .leading, spacing: 2) {
-                                    Text(job.customerName.isEmpty ? "New Milling Job" : job.customerName)
-                                        .font(.headline)
-                                    Text("\(job.totalPieces) pcs · \(job.totalBF.formatted(.number.precision(.fractionLength(0...2)))) BF · \(job.date.formatted(date: .abbreviated, time: .omitted))")
+                                    HStack(spacing: 6) {
+                                        Text(job.customerName.isEmpty ? "New Milling Job" : job.customerName)
+                                            .font(.headline)
+                                        if job.completed {
+                                            Image(systemName: "checkmark.circle.fill")
+                                                .foregroundStyle(.green)
+                                                .font(.subheadline)
+                                        }
+                                    }
+                                    Text("\(job.jobID) · \(job.totalPieces) pcs · \(job.totalBF.formatted(.number.precision(.fractionLength(0...2)))) BF · \(job.date.formatted(date: .abbreviated, time: .omitted))")
                                         .font(.caption)
                                         .foregroundStyle(.secondary)
                                 }
@@ -234,7 +268,7 @@ struct MillingJobsView: View {
         .toolbar {
             ToolbarItem(placement: .primaryAction) {
                 Button {
-                    jobs.insert(MillingJob(), at: 0)
+                    jobs.insert(MillingJob(jobNumber: (jobs.map(\.jobNumber).max() ?? 0) + 1), at: 0)
                 } label: {
                     Label("New Job", systemImage: "plus")
                 }
@@ -243,6 +277,7 @@ struct MillingJobsView: View {
         .onAppear {
             if !loaded {
                 jobs = MillingJobStorage.loadAll()
+                assignMissingJobNumbers()
                 loaded = true
             }
         }
@@ -250,19 +285,51 @@ struct MillingJobsView: View {
             for job in newValue { MillingJobStorage.save(job) }
         }
     }
+
+    /// Gives jobs saved before job IDs existed a number, oldest first, so
+    /// numbering roughly follows the order the work was done.
+    private func assignMissingJobNumbers() {
+        var next = jobs.map(\.jobNumber).max() ?? 0
+        for index in jobs.indices.reversed() where jobs[index].jobNumber == 0 {
+            next += 1
+            jobs[index].jobNumber = next
+            MillingJobStorage.save(jobs[index])
+        }
+    }
 }
 
 private struct MillingJobDetailView: View {
     @Binding var job: MillingJob
     @State private var draft = MillingLine()
+    @State private var reportURL: URL?
 
     var body: some View {
         Form {
             Section("Customer") {
+                LabeledContent("Job ID", value: job.jobID)
                 CustomerSuggestionField(title: "Customer", name: $job.customerName) { _ in }
                 DatePicker("Date", selection: $job.date, displayedComponents: .date)
                 TextField("Notes", text: $job.notes, axis: .vertical)
                     .lineLimit(2...6)
+            }
+
+            Section {
+                Toggle("Job Completed", isOn: $job.completed)
+                if job.completed {
+                    Button {
+                        reportURL = MillingReport.customerLumberReport(for: job)
+                    } label: {
+                        Label("Send Customer Lumber Report", systemImage: "square.and.arrow.up")
+                            .font(.headline)
+                    }
+                    .disabled(job.lines.isEmpty)
+                }
+            } header: {
+                Text("Status")
+            } footer: {
+                if job.completed {
+                    Text("Generates a PDF with every board, totals, and the milling charge — share it straight from the preview.")
+                }
             }
 
             Section("Add Line") {
@@ -331,6 +398,14 @@ private struct MillingJobDetailView: View {
                 Button("Done") {
                     UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
                 }
+            }
+        }
+        .sheet(isPresented: .init(
+            get: { reportURL != nil },
+            set: { if !$0 { reportURL = nil } }
+        )) {
+            if let reportURL {
+                PDFPreviewSheet(url: reportURL, title: "Lumber Report")
             }
         }
     }

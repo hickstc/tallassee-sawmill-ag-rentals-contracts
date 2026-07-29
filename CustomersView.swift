@@ -476,6 +476,7 @@ struct LicenseStatusLabel: View {
 struct CustomerDetailView: View {
     @Binding var customer: Customer
     @State private var showingPicker = false
+    @State private var history: [CustomerHistoryItem] = []
 
     var body: some View {
         Form {
@@ -543,12 +544,123 @@ struct CustomerDetailView: View {
                     }
                 }
             }
+
+            historySection
         }
         .navigationTitle(customer.name.isEmpty ? "Customer" : customer.name)
         .navigationBarTitleDisplayMode(.inline)
         .sheet(isPresented: $showingPicker) {
             ImageCapturePicker(imageData: $customer.licenseImage)
         }
+        .onAppear {
+            history = CustomerHistoryLoader.load(for: customer.name)
+        }
+    }
+
+    @ViewBuilder
+    private var historySection: some View {
+        Section {
+            if history.isEmpty {
+                Text("No jobs on record for this customer yet.")
+                    .foregroundStyle(.secondary)
+            } else {
+                ForEach(history) { item in
+                    HStack {
+                        Label {
+                            VStack(alignment: .leading, spacing: 1) {
+                                Text(item.title)
+                                Text(item.detail)
+                                    .font(.caption)
+                                    .foregroundStyle(.secondary)
+                            }
+                        } icon: {
+                            Image(systemName: item.icon)
+                        }
+                        Spacer()
+                        Text(currencyString(item.amount))
+                            .font(.subheadline.weight(.semibold))
+                    }
+                }
+                LabeledContent("Total Business",
+                               value: currencyString(history.reduce(0) { $0 + $1.amount }))
+                    .font(.headline)
+            }
+        } header: {
+            Text("History")
+        } footer: {
+            if !history.isEmpty {
+                Text("Rentals, ag services, lumber orders, and milling jobs matched by customer name.")
+            }
+        }
+    }
+}
+
+// MARK: - Customer history
+
+/// One past transaction for a customer, from any module.
+struct CustomerHistoryItem: Identifiable {
+    let id: String
+    let date: Date
+    let title: String
+    let detail: String
+    let amount: Double
+    let icon: String
+}
+
+/// Aggregates every module's records for one customer, matched by
+/// case-insensitive name.
+enum CustomerHistoryLoader {
+    static func load(for name: String) -> [CustomerHistoryItem] {
+        let target = normalized(name)
+        guard !target.isEmpty else { return [] }
+        var items: [CustomerHistoryItem] = []
+
+        for rec in RentalAgreementStorage.loadAll() where normalized(rec.customerName) == target {
+            items.append(CustomerHistoryItem(
+                id: "rental-\(rec.id)",
+                date: rec.data.startDate,
+                title: "Rental Agreement",
+                detail: rec.data.startDate.formatted(date: .abbreviated, time: .omitted),
+                amount: rec.data.subtotal,
+                icon: "house.fill"
+            ))
+        }
+        for rec in AgServicesStorage.loadAll() where normalized(rec.customerName) == target {
+            items.append(CustomerHistoryItem(
+                id: "ag-\(rec.id)",
+                date: rec.data.startDate,
+                title: "Ag Services",
+                detail: rec.data.startDate.formatted(date: .abbreviated, time: .omitted),
+                amount: rec.data.estimatedTotal,
+                icon: "leaf.fill"
+            ))
+        }
+        for order in OrderStorage.load() where normalized(order.customerName) == target {
+            items.append(CustomerHistoryItem(
+                id: "order-\(order.id)",
+                date: order.createdAt,
+                title: "Lumber Order",
+                detail: order.createdAt.formatted(date: .abbreviated, time: .omitted),
+                amount: order.subtotal,
+                icon: "list.bullet.rectangle"
+            ))
+        }
+        for job in MillingJobStorage.loadAll() where normalized(job.customerName) == target {
+            items.append(CustomerHistoryItem(
+                id: "milling-\(job.id)",
+                date: job.date,
+                title: "Milling \(job.jobID)\(job.completed ? "" : " (open)")",
+                detail: "\(job.totalBF.formatted(.number.precision(.fractionLength(0...2)))) BF · \(job.date.formatted(date: .abbreviated, time: .omitted))",
+                amount: job.totalPrice,
+                icon: "tree.fill"
+            ))
+        }
+
+        return items.sorted { $0.date > $1.date }
+    }
+
+    private static func normalized(_ name: String) -> String {
+        name.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
     }
 }
 
