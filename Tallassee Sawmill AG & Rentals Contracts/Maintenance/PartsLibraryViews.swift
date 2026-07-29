@@ -11,14 +11,48 @@ import SwiftData
 
 // MARK: - Parts Library List
 
+/// Quick filters shown as search scopes in the library.
+enum PartLibraryScope: String, CaseIterable, Identifiable {
+    case all = "All"
+    case parts = "Parts"
+    case fluids = "Fluids"
+    case lowStock = "Low Stock"
+
+    var id: String { rawValue }
+
+    func includes(_ part: Part) -> Bool {
+        switch self {
+        case .all: return true
+        case .parts: return part.kind == .part
+        case .fluids: return part.kind == .fluid
+        case .lowStock: return part.isLowStock
+        }
+    }
+}
+
 struct PartsLibraryView: View {
     @Environment(\.modelContext) private var modelContext
     @Query(sort: \Part.partDescription) private var parts: [Part]
     @State private var searchText = ""
+    @State private var scope: PartLibraryScope = .all
+    @State private var categoryFilter: PartCategory?
     @State private var showingAddPart = false
+    @State private var showingMerge = false
 
     private var filteredParts: [Part] {
-        parts.filter { $0.matches(searchText) }
+        parts.filter { part in
+            scope.includes(part)
+                && (categoryFilter == nil || part.category == categoryFilter)
+                && part.matches(searchText)
+        }
+    }
+
+    /// Parts sharing a normalized OEM number with at least one other part.
+    private var duplicateCount: Int {
+        Dictionary(grouping: parts.filter { !$0.normalizedOEM.isEmpty }, by: \.normalizedOEM)
+            .values
+            .filter { $0.count > 1 }
+            .count
     }
 
     var body: some View {
@@ -51,8 +85,42 @@ struct PartsLibraryView: View {
             }
         }
         .searchable(text: $searchText, prompt: "OEM #, cross ref, description")
+        .searchScopes($scope, activation: .onSearchPresentation) {
+            ForEach(PartLibraryScope.allCases) { scope in
+                Text(scope.rawValue).tag(scope)
+            }
+        }
         .navigationTitle("Parts Library")
         .toolbar {
+            ToolbarItem(placement: .topBarTrailing) {
+                Menu {
+                    Picker("Filter", selection: $scope) {
+                        ForEach(PartLibraryScope.allCases) { scope in
+                            Text(scope.rawValue).tag(scope)
+                        }
+                    }
+                    Picker("Category", selection: $categoryFilter) {
+                        Text("All Categories").tag(PartCategory?.none)
+                        ForEach(PartCategory.allCases) { category in
+                            Text(category.rawValue).tag(PartCategory?.some(category))
+                        }
+                    }
+                    if duplicateCount > 0 {
+                        Divider()
+                        Button {
+                            showingMerge = true
+                        } label: {
+                            Label("Merge Duplicates (\(duplicateCount))",
+                                  systemImage: "arrow.triangle.merge")
+                        }
+                    }
+                } label: {
+                    Label("Filter",
+                          systemImage: scope == .all && categoryFilter == nil
+                          ? "line.3.horizontal.decrease.circle"
+                          : "line.3.horizontal.decrease.circle.fill")
+                }
+            }
             ToolbarItem(placement: .primaryAction) {
                 Button {
                     showingAddPart = true
@@ -65,6 +133,98 @@ struct PartsLibraryView: View {
             NavigationStack {
                 PartFormView(part: nil)
             }
+        }
+        .sheet(isPresented: $showingMerge) {
+            NavigationStack {
+                MergeDuplicatePartsView()
+            }
+        }
+    }
+}
+
+// MARK: - Merge Duplicates
+
+/// Finds parts whose OEM numbers match (ignoring case/dashes) and merges each
+/// group into one canonical part, relinking machines, purchases, and service
+/// history, and combining stock.
+struct MergeDuplicatePartsView: View {
+    @Environment(\.modelContext) private var modelContext
+    @Environment(\.dismiss) private var dismiss
+    @Query(sort: \Part.partDescription) private var parts: [Part]
+
+    private var duplicateGroups: [[Part]] {
+        Dictionary(grouping: parts.filter { !$0.normalizedOEM.isEmpty }, by: \.normalizedOEM)
+            .values
+            .filter { $0.count > 1 }
+            .sorted { ($0.first?.oemNumber ?? "") < ($1.first?.oemNumber ?? "") }
+    }
+
+    var body: some View {
+        List {
+            if duplicateGroups.isEmpty {
+                ContentUnavailableView(
+                    "No Duplicates",
+                    systemImage: "checkmark.seal",
+                    description: Text("Every OEM number appears only once.")
+                )
+            }
+            ForEach(duplicateGroups, id: \.first?.uuid) { group in
+                Section(group.first?.oemNumber ?? "") {
+                    ForEach(group, id: \.uuid) { part in
+                        VStack(alignment: .leading, spacing: 2) {
+                            Text(part.partDescription)
+                            Text("\(part.stockSummary) on hand · used on \(part.usedOnNames.count) machine(s)")
+                                .font(.caption)
+                                .foregroundStyle(.secondary)
+                        }
+                    }
+                    Button {
+                        merge(group)
+                    } label: {
+                        Label("Merge into “\(group.first?.partDescription ?? "")”",
+                              systemImage: "arrow.triangle.merge")
+                    }
+                }
+            }
+        }
+        .navigationTitle("Merge Duplicates")
+        .navigationBarTitleDisplayMode(.inline)
+        .toolbar {
+            ToolbarItem(placement: .confirmationAction) {
+                Button("Done") { dismiss() }
+            }
+        }
+    }
+
+    /// Keeps the first part (the one with the fullest description sorts first
+    /// in practice) and folds every other member of the group into it.
+    private func merge(_ group: [Part]) {
+        guard let keeper = group.first else { return }
+        for duplicate in group.dropFirst() {
+            // Relink machines, avoiding double links to the same machine.
+            let alreadyLinked = Set((keeper.equipmentLinks ?? []).compactMap { $0.equipment?.uuid })
+            for link in duplicate.equipmentLinks ?? [] {
+                if let machine = link.equipment, alreadyLinked.contains(machine.uuid) {
+                    modelContext.delete(link)
+                } else {
+                    link.part = keeper
+                }
+            }
+            // Move purchase and service history.
+            for purchase in duplicate.purchases ?? [] { purchase.part = keeper }
+            for usage in duplicate.serviceUsages ?? [] { usage.part = keeper }
+
+            // Combine stock and fill in any blanks on the keeper.
+            keeper.quantityOnHand += duplicate.quantityOnHand
+            if keeper.crossRefs.isEmpty { keeper.crossRefs = duplicate.crossRefs }
+            if keeper.preferredSupplier.isEmpty { keeper.preferredSupplier = duplicate.preferredSupplier }
+            if keeper.orderLink.isEmpty { keeper.orderLink = duplicate.orderLink }
+            if keeper.lastPrice == nil { keeper.lastPrice = duplicate.lastPrice }
+            if keeper.lowStockThreshold == 0 { keeper.lowStockThreshold = duplicate.lowStockThreshold }
+            if !duplicate.notes.isEmpty && !keeper.notes.contains(duplicate.notes) {
+                keeper.notes = keeper.notes.isEmpty ? duplicate.notes : "\(keeper.notes)\n\(duplicate.notes)"
+            }
+            modelContext.delete(duplicate)
         }
     }
 }
@@ -130,6 +290,7 @@ struct PartDetailView: View {
         List {
             Section("Part") {
                 LabeledContent("Type", value: part.kind.rawValue)
+                LabeledContent("Category", value: part.category.rawValue)
                 LabeledContent("Description", value: part.partDescription)
                 LabeledContent("OEM Number", value: part.oemNumber.isEmpty ? "—" : part.oemNumber)
                 if !part.crossRefs.isEmpty {
@@ -356,8 +517,10 @@ struct PartFormView: View {
 
     @Environment(\.modelContext) private var modelContext
     @Environment(\.dismiss) private var dismiss
+    @Query private var allParts: [Part]
 
     @State private var kind: PartKind = .part
+    @State private var category: PartCategory = .other
     @State private var oemNumber = ""
     @State private var partDescription = ""
     @State private var crossRefs = ""
@@ -369,15 +532,27 @@ struct PartFormView: View {
     @State private var quantityOnHand: Double = 0
     @State private var lowStockThreshold: Double = 0
 
+    /// An existing library part with the same normalized OEM number.
+    private var duplicateOfExisting: Part? {
+        let normalized = oemNumber.uppercased().filter { $0.isLetter || $0.isNumber }
+        guard !normalized.isEmpty else { return nil }
+        return allParts.first { $0.normalizedOEM == normalized && $0.uuid != part?.uuid }
+    }
+
     var body: some View {
         Form {
-            Section("Part") {
+            Section {
                 Picker("Type", selection: $kind) {
                     ForEach(PartKind.allCases) { kind in
                         Text(kind.rawValue).tag(kind)
                     }
                 }
                 .pickerStyle(.segmented)
+                Picker("Category", selection: $category) {
+                    ForEach(PartCategory.allCases) { category in
+                        Text(category.rawValue).tag(category)
+                    }
+                }
                 TextField("Description (e.g. Engine oil filter)", text: $partDescription)
                 TextField("OEM Number", text: $oemNumber)
                     .autocorrectionDisabled()
@@ -385,6 +560,14 @@ struct PartFormView: View {
                 TextField("Aftermarket Cross Refs (comma separated)", text: $crossRefs)
                     .autocorrectionDisabled()
                     .textInputAutocapitalization(.characters)
+            } header: {
+                Text("Part")
+            } footer: {
+                if let duplicate = duplicateOfExisting {
+                    Label("“\(duplicate.partDescription)” already has this OEM number. Consider using it instead of adding a duplicate.",
+                          systemImage: "exclamationmark.triangle.fill")
+                        .foregroundStyle(.orange)
+                }
             }
 
             Section {
@@ -435,6 +618,7 @@ struct PartFormView: View {
     private func loadExisting() {
         guard let part else { return }
         kind = part.kind
+        category = part.category
         oemNumber = part.oemNumber
         partDescription = part.partDescription
         crossRefs = part.crossRefs
@@ -456,6 +640,7 @@ struct PartFormView: View {
             modelContext.insert(saved)
         }
         saved.kind = kind
+        saved.category = category
         saved.oemNumber = oemNumber.trimmingCharacters(in: .whitespaces)
         saved.partDescription = partDescription.trimmingCharacters(in: .whitespaces)
         saved.crossRefs = crossRefs

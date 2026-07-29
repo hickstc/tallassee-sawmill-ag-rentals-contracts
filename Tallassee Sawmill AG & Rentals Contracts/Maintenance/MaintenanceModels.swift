@@ -235,10 +235,26 @@ enum PartKind: String, CaseIterable, Identifiable {
     }
 }
 
+/// Functional grouping for browsing the master library.
+enum PartCategory: String, CaseIterable, Identifiable {
+    case filters = "Filters"
+    case beltsHoses = "Belts & Hoses"
+    case electrical = "Batteries & Electrical"
+    case engine = "Engine"
+    case hydraulic = "Hydraulic"
+    case undercarriage = "Undercarriage & Tires"
+    case cutting = "Blades & Cutting"
+    case fluids = "Fluids & Lubricants"
+    case other = "Other"
+
+    var id: String { rawValue }
+}
+
 @Model
 final class Part {
     var uuid: UUID = UUID()
     var kindRaw: String = PartKind.part.rawValue
+    var categoryRaw: String = PartCategory.other.rawValue
     /// Manufacturer part number, e.g. "V0531-43150".
     var oemNumber: String = ""
     var partDescription: String = ""
@@ -296,6 +312,18 @@ final class Part {
     var kind: PartKind {
         get { PartKind(rawValue: kindRaw) ?? .part }
         set { kindRaw = newValue.rawValue }
+    }
+
+    var category: PartCategory {
+        get { PartCategory(rawValue: categoryRaw) ?? .other }
+        set { categoryRaw = newValue.rawValue }
+    }
+
+    /// OEM number normalized for duplicate detection (case/whitespace/dashes ignored).
+    var normalizedOEM: String {
+        oemNumber
+            .uppercased()
+            .filter { $0.isLetter || $0.isNumber }
     }
 
     /// Case-insensitive match on OEM number, cross refs, description, or supplier.

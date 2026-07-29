@@ -111,7 +111,8 @@ enum MaintenanceStore {
         addPlaceholder(description: "Belts", to: kx, context: context)
     }
 
-    /// Creates a master-library part and links it to a machine.
+    /// Creates a master-library part and links it to a machine. The category
+    /// is inferred from the description so seeds group sensibly in the library.
     @discardableResult
     private static func addPart(
         oem: String,
@@ -124,10 +125,20 @@ enum MaintenanceStore {
         context: ModelContext
     ) -> Part {
         let part = Part(kind: kind, oemNumber: oem, partDescription: description, notes: notes, unit: unit)
+        part.category = inferredCategory(description: description, kind: kind)
         context.insert(part)
         let link = EquipmentPart(usageNote: usage, equipment: equipment, part: part)
         context.insert(link)
         return part
+    }
+
+    private static func inferredCategory(description: String, kind: PartKind) -> PartCategory {
+        if kind == .fluid { return .fluids }
+        let lowered = description.lowercased()
+        if lowered.contains("filter") { return .filters }
+        if lowered.contains("belt") || lowered.contains("hose") { return .beltsHoses }
+        if lowered.contains("battery") { return .electrical }
+        return .other
     }
 
     private static func addPlaceholder(
