@@ -139,9 +139,13 @@ struct MillingJob: Identifiable, Codable, Hashable {
     var sawmillMobilization: Bool = false
     var skidSteerMobilization: Bool = false
     var lines: [MillingLine] = []
+    
+    // Job media (photos/videos with Before/After labels)
+    var mediaItems: [JobMediaItem] = []
 
     init(jobNumber: Int = 0) {
         self.jobNumber = jobNumber
+        self.mediaItems = []
     }
 
     var totalBF: Double { lines.reduce(0) { $0 + $1.totalBF } }
@@ -161,6 +165,7 @@ struct MillingJob: Identifiable, Codable, Hashable {
     enum CodingKeys: String, CodingKey {
         case id, jobNumber, customerName, date, notes, completed
         case sawmillMobilization, skidSteerMobilization, lines
+        case mediaItems
     }
 
     init(from decoder: Decoder) throws {
@@ -174,6 +179,7 @@ struct MillingJob: Identifiable, Codable, Hashable {
         sawmillMobilization = try container.decodeIfPresent(Bool.self, forKey: .sawmillMobilization) ?? false
         skidSteerMobilization = try container.decodeIfPresent(Bool.self, forKey: .skidSteerMobilization) ?? false
         lines = try container.decodeIfPresent([MillingLine].self, forKey: .lines) ?? []
+        mediaItems = try container.decodeIfPresent([JobMediaItem].self, forKey: .mediaItems) ?? []
     }
 }
 
@@ -190,7 +196,10 @@ enum MillingJobStorage {
         guard let urls = try? FileManager.default.contentsOfDirectory(at: dir, includingPropertiesForKeys: nil) else { return [] }
         var jobs: [MillingJob] = []
         for url in urls where url.pathExtension.lowercased() == "json" {
-            if let data = try? Data(contentsOf: url), let job = try? JSONDecoder().decode(MillingJob.self, from: data) {
+            if let data = try? Data(contentsOf: url),
+               var job = try? JSONDecoder().decode(MillingJob.self, from: data) {
+                // Load media for this job
+                job.mediaItems = JobMediaStorage.loadMedia(jobID: job.id, jobType: .milling)
                 jobs.append(job)
             }
         }
@@ -204,6 +213,8 @@ enum MillingJobStorage {
         do {
             try data.write(to: fileURL, options: [.atomic])
             applyFileProtection(fileURL)
+            // Save media files
+            JobMediaStorage.saveMedia(job.mediaItems, jobID: job.id, jobType: .milling)
         } catch {}
     }
 
@@ -214,6 +225,8 @@ enum MillingJobStorage {
             .first(where: { $0.lastPathComponent.hasPrefix(prefix) }) {
             try? FileManager.default.removeItem(at: url)
         }
+        // Delete associated media
+        JobMediaStorage.deleteAllMedia(jobID: job.id, jobType: .milling)
     }
 
     private static func filename(for job: MillingJob) -> String {
@@ -359,6 +372,37 @@ private struct MillingJobDetailView: View {
                 if job.completed {
                     Text("Generates a PDF with every board, totals, and the milling charge — share it straight from the preview.")
                 }
+            }
+
+            Section {
+                NavigationLink {
+                    JobMediaGalleryView(
+                        jobID: job.id,
+                        jobType: .milling,
+                        mediaItems: Binding(
+                            get: { job.mediaItems },
+                            set: { 
+                                job.mediaItems = $0
+                                MillingJobStorage.save(job)
+                            }
+                        )
+                    )
+                } label: {
+                    HStack {
+                        Label("Job Photos & Videos", systemImage: "photo.on.rectangle")
+                        Spacer()
+                        if !job.mediaItems.isEmpty {
+                            Text("\(job.mediaItems.count)")
+                                .font(.caption)
+                                .foregroundStyle(.secondary)
+                        }
+                        Image(systemName: "chevron.right")
+                            .font(.caption)
+                            .foregroundStyle(.tertiary)
+                    }
+                }
+            } footer: {
+                Text("Document this milling job with before and after photos or videos.")
             }
 
             Section("Add Line") {

@@ -245,6 +245,8 @@ struct JobFormView: View {
     @State private var notes = ""
     @State private var status: JobStatus = .scheduled
     @State private var savedCustomers: [Customer] = []
+    /// Name awaiting the "create new customer?" confirmation.
+    @State private var pendingCreateName: String?
 
     var body: some View {
         Form {
@@ -309,12 +311,55 @@ struct JobFormView: View {
             savedCustomers = CustomerStorage.load().sorted { $0.name < $1.name }
             loadExisting()
         }
+        .alert(
+            "No customer named “\(pendingCreateName ?? "")” was found.",
+            isPresented: .init(
+                get: { pendingCreateName != nil },
+                set: { if !$0 { pendingCreateName = nil } }
+            )
+        ) {
+            Button("Create") {
+                if let pendingCreateName {
+                    createCustomer(named: pendingCreateName)
+                }
+                pendingCreateName = nil
+                commit()
+            }
+            Button("Cancel", role: .cancel) {
+                // Keep the job with the typed name; just don't add a customer.
+                pendingCreateName = nil
+                commit()
+            }
+        } message: {
+            Text("Would you like to create a new customer?")
+        }
     }
 
     private func fill(from saved: Customer) {
         customer = saved.name
         if phone.isEmpty { phone = saved.phone }
         if address.isEmpty { address = saved.address }
+    }
+
+    /// Exact match on trimmed, case-insensitive name.
+    private func exactMatch(for trimmed: String, in list: [Customer]) -> Customer? {
+        list.first {
+            $0.name.trimmingCharacters(in: .whitespacesAndNewlines)
+                .compare(trimmed, options: .caseInsensitive) == .orderedSame
+        }
+    }
+
+    /// Saves the new customer record with the job's contact details —
+    /// only reached from the Create button.
+    private func createCustomer(named trimmed: String) {
+        var all = CustomerStorage.load()
+        guard exactMatch(for: trimmed, in: all) == nil else { return }
+        var newCustomer = Customer(name: trimmed)
+        newCustomer.phone = phone.trimmingCharacters(in: .whitespaces)
+        newCustomer.address = address.trimmingCharacters(in: .whitespacesAndNewlines)
+        all.append(newCustomer)
+        CustomerStorage.save(all)
+        savedCustomers = all.sorted { $0.name < $1.name }
     }
 
     private func loadExisting() {
@@ -329,7 +374,22 @@ struct JobFormView: View {
         status = job.status
     }
 
+    /// Resolves the customer before committing: an existing customer (matched
+    /// on trimmed, case-insensitive name) is reused as-is; an unknown,
+    /// non-blank name asks whether to create a new customer first.
     private func save() {
+        let trimmed = customer.trimmingCharacters(in: .whitespacesAndNewlines)
+        if let existing = exactMatch(for: trimmed, in: savedCustomers) {
+            customer = existing.name // reuse the saved customer's spelling
+            commit()
+        } else if !trimmed.isEmpty {
+            pendingCreateName = trimmed
+        } else {
+            commit() // unreachable: Save is disabled for blank names
+        }
+    }
+
+    private func commit() {
         let saved: ScheduledJob
         if let job {
             saved = job

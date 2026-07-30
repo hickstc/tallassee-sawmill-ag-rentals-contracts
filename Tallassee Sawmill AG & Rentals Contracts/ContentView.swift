@@ -14,6 +14,7 @@ enum ContractType: String, CaseIterable, Identifiable, Hashable {
     case maintenance
     case customers
     case financials
+    case allPhotos
     case settings
 
     var id: String { rawValue }
@@ -29,6 +30,7 @@ enum ContractType: String, CaseIterable, Identifiable, Hashable {
         case .maintenance: return "Maintenance"
         case .customers: return "Customers"
         case .financials: return "Financial Report"
+        case .allPhotos: return "All Job Photos"
         case .settings: return "Settings"
         }
     }
@@ -44,6 +46,7 @@ enum ContractType: String, CaseIterable, Identifiable, Hashable {
         case .maintenance: return "wrench.and.screwdriver.fill"
         case .customers: return "person.2.fill"
         case .financials: return "chart.bar.fill"
+        case .allPhotos: return "photo.on.rectangle"
         case .settings: return "gearshape.fill"
         }
     }
@@ -83,6 +86,8 @@ struct ContentView: View {
             CustomersView()
         case .financials:
             FinancialReportView()
+        case .allPhotos:
+            AllJobsMediaBrowser()
         case .settings:
             SettingsView()
         }

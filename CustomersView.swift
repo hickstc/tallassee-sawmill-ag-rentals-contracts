@@ -241,6 +241,10 @@ struct CustomerSuggestionField: View {
 
     @State private var customers: [Customer] = []
     @State private var justSelected = false
+    /// Name awaiting the "create new customer?" confirmation.
+    @State private var pendingCreateName: String?
+    /// Name the user declined to create, so the same entry isn't re-prompted.
+    @State private var declinedName = ""
     @FocusState private var focused: Bool
 
     private var matches: [Customer] {
@@ -260,6 +264,7 @@ struct CustomerSuggestionField: View {
                     .multilineTextAlignment(.trailing)
                     .textInputAutocapitalization(autocap)
                     .focused($focused)
+                    .onSubmit { resolveTypedName() }
             }
 
             if focused && !justSelected {
@@ -292,11 +297,77 @@ struct CustomerSuggestionField: View {
         }
         .onAppear { customers = CustomerStorage.load() }
         .onChange(of: name) { _, _ in justSelected = false }
+        .onChange(of: focused) { wasFocused, isFocused in
+            if wasFocused && !isFocused { resolveTypedName() }
+        }
+        .alert(
+            "No customer named “\(pendingCreateName ?? "")” was found.",
+            isPresented: .init(
+                get: { pendingCreateName != nil },
+                set: { if !$0 { pendingCreateName = nil } }
+            )
+        ) {
+            Button("Create") {
+                if let pendingCreateName {
+                    createCustomer(named: pendingCreateName)
+                }
+                pendingCreateName = nil
+            }
+            Button("Cancel", role: .cancel) {
+                declinedName = pendingCreateName ?? ""
+                pendingCreateName = nil
+            }
+        } message: {
+            Text("Would you like to create a new customer?")
+        }
     }
 
     private func subtitle(for customer: Customer) -> String? {
         let parts = [customer.phone, customer.email].filter { !$0.isEmpty }
         return parts.isEmpty ? nil : parts.joined(separator: " · ")
+    }
+
+    /// Exact match on trimmed, case-insensitive name.
+    private func exactMatch(for trimmed: String, in list: [Customer]) -> Customer? {
+        list.first {
+            $0.name.trimmingCharacters(in: .whitespacesAndNewlines)
+                .compare(trimmed, options: .caseInsensitive) == .orderedSame
+        }
+    }
+
+    /// When typing ends: reuse the saved customer if the name matches one,
+    /// otherwise offer to create a new customer. Blank names do nothing.
+    private func resolveTypedName() {
+        guard !justSelected else { return }
+        let trimmed = name.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !trimmed.isEmpty else { return }
+
+        if let existing = exactMatch(for: trimmed, in: customers) {
+            if name != existing.name {
+                name = existing.name // adopt the saved spelling
+            }
+            onSelect(existing)
+        } else if trimmed.compare(declinedName, options: .caseInsensitive) != .orderedSame {
+            pendingCreateName = trimmed
+        }
+    }
+
+    /// Saves the new customer and attaches it — only reached from Create.
+    private func createCustomer(named trimmed: String) {
+        var all = CustomerStorage.load()
+        // Re-check against fresh data so a duplicate is never saved.
+        if let existing = exactMatch(for: trimmed, in: all) {
+            customers = all
+            name = existing.name
+            onSelect(existing)
+            return
+        }
+        let customer = Customer(name: trimmed)
+        all.append(customer)
+        CustomerStorage.save(all)
+        customers = all
+        name = customer.name
+        onSelect(customer)
     }
 }
 

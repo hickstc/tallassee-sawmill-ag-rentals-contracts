@@ -21,7 +21,10 @@ enum AgServicesStorage {
         guard let urls = try? FileManager.default.contentsOfDirectory(at: dir, includingPropertiesForKeys: nil) else { return [] }
         var records: [AgServicesRecord] = []
         for url in urls where url.pathExtension.lowercased() == "json" {
-            if let data = try? Data(contentsOf: url), let rec = try? JSONDecoder().decode(AgServicesRecord.self, from: data) {
+            if let data = try? Data(contentsOf: url),
+               var rec = try? JSONDecoder().decode(AgServicesRecord.self, from: data) {
+                // Load media for this record
+                rec.data.mediaItems = JobMediaStorage.loadMedia(jobID: rec.id, jobType: .agServices)
                 records.append(rec)
             }
         }
@@ -45,6 +48,8 @@ enum AgServicesStorage {
         do {
             try data.write(to: fileURL, options: [.atomic])
             applyFileProtection(fileURL)
+            // Save media files
+            JobMediaStorage.saveMedia(rec.data.mediaItems, jobID: rec.id, jobType: .agServices)
         } catch {
             // ignore
         }
@@ -57,6 +62,8 @@ enum AgServicesStorage {
             .first(where: { $0.lastPathComponent.hasPrefix(prefix) }) {
             try? FileManager.default.removeItem(at: url)
         }
+        // Delete associated media
+        JobMediaStorage.deleteAllMedia(jobID: id, jobType: .agServices)
     }
 
     private static func filename(for rec: AgServicesRecord) -> String {

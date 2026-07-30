@@ -10,8 +10,19 @@
 
 import SwiftUI
 import SwiftData
+import UniformTypeIdentifiers
 
 // MARK: - Dashboard
+
+/// Identifiable card sections for reordering
+enum DashboardSection: String, Codable, Identifiable, CaseIterable {
+    case fleetStatus
+    case schedule
+    case businessSummary
+    case quickActions
+    
+    var id: String { rawValue }
+}
 
 struct HomeDashboardView: View {
     // Fleet status and the unified schedule, straight from SwiftData so
@@ -26,22 +37,47 @@ struct HomeDashboardView: View {
     @State private var millingJobs: [MillingJob] = []
     @State private var lumberOrders: [LumberOrder] = []
 
+    /// Persisted card order; Quick Actions can be moved among other sections.
+    @AppStorage("dashboardSectionOrder") private var sectionOrderData: Data = Data()
+    @State private var sectionOrder: [DashboardSection] = []
+    
+    /// Track which card is being dragged
+    @State private var draggingSection: DashboardSection?
+
     var body: some View {
         ScrollView {
-            VStack(alignment: .leading, spacing: 16) {
+            VStack(alignment: .leading, spacing: 18) {
                 header
-                fleetStatusCard
-                todaysJobsCard
-                businessSummaryCard
-                quickActionsCard
+                
+                ForEach(sectionOrder) { section in
+                    cardView(for: section)
+                        .onDrag {
+                            if section == .quickActions {
+                                draggingSection = section
+                                return NSItemProvider(object: section.rawValue as NSString)
+                            }
+                            return NSItemProvider()
+                        }
+                        .onDrop(of: [.text], delegate: DropViewDelegate(
+                            section: section,
+                            sectionOrder: $sectionOrder,
+                            draggingSection: $draggingSection,
+                            onReorder: saveSectionOrder
+                        ))
+                }
             }
             .padding(.horizontal)
             .padding(.bottom, 24)
         }
-        .background(Color(.systemGroupedBackground))
+        .background { DashboardBackground() }
         .navigationTitle("Tallassee Sawmill")
         .navigationBarTitleDisplayMode(.large)
-        .onAppear(perform: reload)
+        .onAppear {
+            if sectionOrder.isEmpty {
+                loadSectionOrder()
+            }
+            reload()
+        }
         .refreshable { reload() }
     }
 
@@ -50,6 +86,40 @@ struct HomeDashboardView: View {
         agJobs = AgServicesStorage.loadAll()
         millingJobs = MillingJobStorage.loadAll()
         lumberOrders = OrderStorage.load()
+    }
+    
+    /// Returns the appropriate card view for each section
+    @ViewBuilder
+    private func cardView(for section: DashboardSection) -> some View {
+        switch section {
+        case .fleetStatus:
+            fleetStatusCard
+        case .schedule:
+            todaysJobsCard
+        case .businessSummary:
+            businessSummaryCard
+        case .quickActions:
+            quickActionsCard
+                .opacity(draggingSection == .quickActions ? 0.85 : 1.0)
+        }
+    }
+    
+    /// Load section order from UserDefaults or use default
+    private func loadSectionOrder() {
+        if let decoded = try? JSONDecoder().decode([DashboardSection].self, from: sectionOrderData),
+           !decoded.isEmpty {
+            sectionOrder = decoded
+        } else {
+            // Default order
+            sectionOrder = [.fleetStatus, .schedule, .businessSummary, .quickActions]
+        }
+    }
+    
+    /// Save section order to UserDefaults
+    private func saveSectionOrder() {
+        if let encoded = try? JSONEncoder().encode(sectionOrder) {
+            sectionOrderData = encoded
+        }
     }
 
     // MARK: Header
@@ -240,8 +310,7 @@ struct HomeDashboardView: View {
                         }
                         .frame(maxWidth: .infinity, alignment: .leading)
                         .padding(10)
-                        .background(Color(.tertiarySystemGroupedBackground),
-                                    in: RoundedRectangle(cornerRadius: 10))
+                        .glassTile(cornerRadius: 12)
                     }
                 }
             }
@@ -253,8 +322,17 @@ struct HomeDashboardView: View {
     private var quickActionsCard: some View {
         DashboardCard {
             VStack(alignment: .leading, spacing: 10) {
-                Text("Quick Actions")
-                    .font(.headline)
+                HStack {
+                    Text("Quick Actions")
+                        .font(.headline)
+                    Spacer()
+                    Image(systemName: "hand.draw")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                    Text("Press & hold to move")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                }
                 LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible()), GridItem(.flexible())],
                           spacing: 10) {
                     ForEach(ContractType.allCases) { type in
@@ -272,8 +350,7 @@ struct HomeDashboardView: View {
                             .frame(maxWidth: .infinity)
                             .padding(.vertical, 10)
                             .padding(.horizontal, 2)
-                            .background(Color(.tertiarySystemGroupedBackground),
-                                        in: RoundedRectangle(cornerRadius: 10))
+                            .glassTile(cornerRadius: 12)
                         }
                         .buttonStyle(.plain)
                     }
@@ -283,18 +360,151 @@ struct HomeDashboardView: View {
     }
 }
 
-// MARK: - Card container
+// MARK: - Drag & Drop Support
 
-/// Shared rounded-card look for all dashboard sections.
+/// Handles drop operations for reordering dashboard sections
+struct DropViewDelegate: DropDelegate {
+    let section: DashboardSection
+    @Binding var sectionOrder: [DashboardSection]
+    @Binding var draggingSection: DashboardSection?
+    let onReorder: () -> Void
+    
+    func dropEntered(info: DropInfo) {
+        guard let draggingSection = draggingSection,
+              draggingSection != section,
+              let fromIndex = sectionOrder.firstIndex(of: draggingSection),
+              let toIndex = sectionOrder.firstIndex(of: section) else {
+            return
+        }
+        
+        if fromIndex != toIndex {
+            withAnimation(.spring(response: 0.3, dampingFraction: 0.8)) {
+                sectionOrder.move(fromOffsets: IndexSet(integer: fromIndex), toOffset: toIndex > fromIndex ? toIndex + 1 : toIndex)
+            }
+        }
+    }
+    
+    func performDrop(info: DropInfo) -> Bool {
+        draggingSection = nil
+        onReorder()
+        return true
+    }
+    
+    func dropUpdated(info: DropInfo) -> DropProposal? {
+        DropProposal(operation: .move)
+    }
+}
+
+// MARK: - Glass styling
+
+/// Full-screen gradient backdrop (forest green → warm wood brown) that makes
+/// the frosted glass cards pop. Features the app logo as a large, dark, clearly
+/// visible design element that remains readable beneath the frosted cards.
+private struct DashboardBackground: View {
+    @Environment(\.colorScheme) private var colorScheme
+    
+    var body: some View {
+        ZStack {
+            // Base layer adapts to system appearance
+            Color(.systemGroupedBackground)
+            
+            // Forest-green to wood-brown gradient with professional opacity
+            LinearGradient(
+                colors: gradientColors,
+                startPoint: .topLeading,
+                endPoint: .bottomTrailing
+            )
+            
+            // Subtle radial accent for organic depth
+            RadialGradient(
+                colors: [
+                    Color.green.opacity(colorScheme == .dark ? 0.15 : 0.12),
+                    Color.clear
+                ],
+                center: .topLeading,
+                startRadius: 20,
+                endRadius: 400
+            )
+            
+            RadialGradient(
+                colors: [
+                    Color.brown.opacity(colorScheme == .dark ? 0.12 : 0.10),
+                    Color.clear
+                ],
+                center: .bottomTrailing,
+                startRadius: 20,
+                endRadius: 400
+            )
+            
+            // App logo: large, dark, and clearly visible as a design element.
+            // The frosted glass cards provide sufficient blur for text readability.
+            Image("Logo")
+                .resizable()
+                .scaledToFit()
+                .frame(maxWidth: 600, maxHeight: 600)
+                .opacity(colorScheme == .dark ? 0.25 : 0.35)
+                .blendMode(colorScheme == .dark ? .softLight : .multiply)
+                .allowsHitTesting(false)  // Never intercepts taps
+        }
+        .ignoresSafeArea()
+    }
+    
+    private var gradientColors: [Color] {
+        if colorScheme == .dark {
+            // Dark mode: deeper tones with more saturation for visibility
+            return [
+                Color(red: 0.15, green: 0.35, blue: 0.20),  // Forest green
+                Color(red: 0.12, green: 0.20, blue: 0.15),  // Dark green-brown
+                Color(red: 0.25, green: 0.18, blue: 0.12),  // Wood brown
+            ]
+        } else {
+            // Light mode: softer, warmer tones that don't overpower
+            return [
+                Color(red: 0.88, green: 0.95, blue: 0.90),  // Soft sage
+                Color(red: 0.96, green: 0.94, blue: 0.88),  // Warm cream
+                Color(red: 0.92, green: 0.88, blue: 0.80),  // Wood tan
+            ]
+        }
+    }
+}
+
+/// Shared glass-card look for all dashboard sections: translucent material,
+/// hairline border, and a soft shadow for gentle depth.
 private struct DashboardCard<Content: View>: View {
     @ViewBuilder var content: Content
 
     var body: some View {
         content
             .frame(maxWidth: .infinity, alignment: .leading)
-            .padding(14)
-            .background(Color(.secondarySystemGroupedBackground),
-                        in: RoundedRectangle(cornerRadius: 14))
+            .padding(16)
+            .background(.ultraThinMaterial,
+                        in: RoundedRectangle(cornerRadius: 18, style: .continuous))
+            .overlay(
+                RoundedRectangle(cornerRadius: 18, style: .continuous)
+                    .strokeBorder(Color.primary.opacity(0.08), lineWidth: 0.75)
+            )
+            .shadow(color: Color.black.opacity(0.08), radius: 10, x: 0, y: 4)
+    }
+}
+
+/// Small translucent tile used inside cards (metrics, quick actions).
+private struct GlassTile: ViewModifier {
+    let cornerRadius: CGFloat
+
+    func body(content: Content) -> some View {
+        content
+            .background(.thinMaterial,
+                        in: RoundedRectangle(cornerRadius: cornerRadius, style: .continuous))
+            .overlay(
+                RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
+                    .strokeBorder(Color.primary.opacity(0.06), lineWidth: 0.5)
+            )
+    }
+}
+
+private extension View {
+    func glassTile(cornerRadius: CGFloat) -> some View {
+        modifier(GlassTile(cornerRadius: cornerRadius))
     }
 }
 

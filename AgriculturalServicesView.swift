@@ -97,6 +97,10 @@ struct AgServicesData: Codable, Equatable, Hashable {
     var workDescription = ""
     var marketingDeclined = false
     var signatureData: Data?
+    
+    // Job media (photos/videos with Before/After labels)
+    var mediaItems: [JobMediaItem] = []
+    
     // Stored as an optional raw value so agreements saved before this field existed still decode.
     var paymentMethodRaw: String?
 
@@ -267,6 +271,42 @@ struct AgriculturalServicesView: View {
 
             Section("Photos & Marketing") {
                 Toggle("Customer declines marketing photos/videos", isOn: $data.marketingDeclined)
+            }
+
+            Section {
+                NavigationLink {
+                    if let recordID = currentRecord?.id {
+                        JobMediaGalleryView(
+                            jobID: recordID,
+                            jobType: .agServices,
+                            mediaItems: Binding(
+                                get: { data.mediaItems },
+                                set: { data.mediaItems = $0 }
+                            )
+                        )
+                    } else {
+                        Text("Save the job first to add photos or videos.")
+                            .foregroundStyle(.secondary)
+                            .frame(maxWidth: .infinity, alignment: .center)
+                            .padding()
+                    }
+                } label: {
+                    HStack {
+                        Label("Job Photos & Videos", systemImage: "photo.on.rectangle")
+                        Spacer()
+                        if !data.mediaItems.isEmpty {
+                            Text("\(data.mediaItems.count)")
+                                .font(.caption)
+                                .foregroundStyle(.secondary)
+                        }
+                        Image(systemName: "chevron.right")
+                            .font(.caption)
+                            .foregroundStyle(.tertiary)
+                    }
+                }
+                .disabled(currentRecord == nil)
+            } footer: {
+                Text("Document this job with before and after photos or videos.")
             }
 
             Section("Customer Signature") {
